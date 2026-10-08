@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0E1116;color:#F2E9D8;font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+a{color:#E0A64B;text-decoration:none}a:hover{color:#F2C676}
+textarea,input,button{font-family:inherit}
+textarea::placeholder,input::placeholder{color:#7F7B72}
+:focus{outline:none}:focus-visible{outline:2px solid #E0A64B;outline-offset:2px}
+::selection{background:rgba(224,166,75,.35)}
+@keyframes df-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes df-pulse{0%,100%{box-shadow:0 0 0 0 rgba(63,185,168,.45)}50%{box-shadow:0 0 0 6px rgba(63,185,168,0)}}
+@keyframes df-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+<div style="min-height:100vh;background:radial-gradient(ellipse 90% 60% at 50% -10%,#1B2333 0%,#141A24 45%,#0E1116 100%);color:#F2E9D8;font-family:Manrope,system-ui,sans-serif;font-size:15px;line-height:1.55;position:relative;display:flex;flex-direction:column;">
+  <div style="position:absolute;inset:0;pointer-events:none;opacity:.07;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E&quot;);"></div>
+
+  <nav style="position:relative;display:flex;align-items:center;gap:28px;padding:18px 48px;max-width:1440px;width:100%;margin:0 auto;box-sizing:border-box;">
+    <a href="#" onClick="{{ goHome }}" style="display:flex;align-items:center;gap:10px;color:#F2E9D8;margin-right:auto;">
+      <span style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#E0A64B,#B77A2C);display:grid;place-items:center;"><span style="width:10px;height:10px;background:#0E1116;transform:rotate(45deg);border-radius:2px;display:block;"></span></span>
+      <span style="font-family:Spectral,Georgia,serif;font-weight:600;font-size:20px;letter-spacing:.01em;">DeckForge</span>
+    </a>
+    <a href="#" onClick="{{ goHome }}" style="color:#F2E9D8;font-size:14px;font-weight:500;" style-hover="color:#E0A64B">New deck</a>
+    <a href="#" style="color:#A9A396;font-size:14px;font-weight:500;" style-hover="color:#E0A64B">About</a>
+  </nav>
+
+  <main style="position:relative;flex:1;width:100%;max-width:1440px;margin:0 auto;padding:0 48px 80px;box-sizing:border-box;">
+
+    <!-- LANDING -->
+    <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+      <section data-screen-label="Landing" style="max-width:860px;margin:72px auto 0;display:flex;flex-direction:column;gap:36px;">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A9A396;font-weight:600;">AI deck builder for Hearthstone</div>
+          <h1 style="font-family:Spectral,Georgia,serif;font-weight:500;font-size:64px;line-height:1.05;letter-spacing:-.01em;margin:0;text-wrap:balance;">Describe the deck. <em style="font-style:italic;color:#E0A64B;">We forge it.</em></h1>
+          <p style="margin:0;font-size:18px;color:#A9A396;max-width:560px;text-wrap:pretty;">Type what you want to play. You get a legal 30-card Standard deck and a code that pastes straight into the game.</p>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="background:#141A24;border:1px solid rgba(242,233,216,.12);border-radius:16px;padding:18px 18px 14px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);" style-focus="border-color:rgba(224,166,75,.5);box-shadow:inset 0 0 0 1px rgba(224,166,75,.25),0 20px 60px rgba(0,0,0,.35)">
+            <textarea value="{{ prompt }}" onChange="{{ onPrompt }}" onKeyDown="{{ onPromptKey }}" rows="3" placeholder="Build a Standard Shaman deck around Shudderwock…" style="width:100%;resize:none;background:transparent;border:0;color:#F2E9D8;font-size:18px;line-height:1.5;padding:4px 6px;box-sizing:border-box;"></textarea>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid rgba(242,233,216,.08);padding-top:14px;">
+              <div style="display:inline-flex;border:1px solid rgba(242,233,216,.12);border-radius:999px;padding:3px;gap:2px;">
+                <span style="padding:5px 14px;border-radius:999px;background:rgba(242,233,216,.1);font-size:13px;font-weight:600;">Standard</span>
+                <span style="padding:5px 14px;border-radius:999px;font-size:13px;color:#7F7B72;display:inline-flex;gap:6px;align-items:center;">Wild <span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(242,233,216,.15);border-radius:999px;padding:1px 6px;">soon</span></span>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1;">
+                <sc-for list="{{ classChips }}" as="c" hint-placeholder-count="11">
+                  <button onClick="{{ c.pick }}" style="display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.fg }};font-size:12.5px;font-weight:600;cursor:pointer;" style-hover="border-color:rgba(242,233,216,.35)"><span style="width:8px;height:8px;border-radius:50%;background:{{ c.color }};display:block;"></span>{{ c.name }}</button>
+                </sc-for>
+              </div>
+              <button onClick="{{ forge }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:999px;border:0;background:#E0A64B;color:#0E1116;font-size:15px;font-weight:700;cursor:pointer;" style-hover="background:#F2C676" style-active="background:#C68E3A">Forge deck <span style="width:8px;height:8px;background:#0E1116;transform:rotate(45deg);display:block;border-radius:1px;"></span></button>
+            </div>
+          </div>
+
+          <sc-if value="{{ errVague }}" hint-placeholder-val="{{ false }}">
+            <div data-screen-label="Error: vague" style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;border:1px solid rgba(224,166,75,.35);background:rgba(224,166,75,.08);animation:df-rise .3s ease;">
+              <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #E0A64B;color:#E0A64B;display:grid;place-items:center;font-size:13px;font-weight:700;flex:none;">?</span>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="font-weight:600;">Tell me a class or a card to build around.</div>
+                <div style="color:#A9A396;font-size:14px;">“Aggro” alone isn’t enough. Try one of these:</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+                  <sc-for list="{{ vagueFixes }}" as="e" hint-placeholder-count="3"><button onClick="{{ e.use }}" style="padding:6px 12px;border-radius:999px;border:1px solid rgba(242,233,216,.15);background:transparent;color:#F2E9D8;font-size:13px;cursor:pointer;" style-hover="border-color:#E0A64B;color:#E0A64B">{{ e.text }}</button></sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ errRotated }}" hint-placeholder-val="{{ false }}">
+            <div data-screen-label="Error: rotated" style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;border:1px solid rgba(224,166,75,.35);background:rgba(224,166,75,.08);animation:df-rise .3s ease;">
+              <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #E0A64B;color:#E0A64B;display:grid;place-items:center;font-size:13px;font-weight:700;flex:none;">!</span>
+              <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+                <div style="font-weight:600;"><strong style="font-weight:700;">N’Zoth</strong> isn’t in Standard anymore. It rotated to Wild.</div>
+                <div style="color:#A9A396;font-size:14px;">Wild support is coming. For Standard, the closest Deathrattle payoff is <strong style="color:#F2E9D8;font-weight:600;">Hagatha the Fabled</strong>.</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+                  <button onClick="{{ useRotatedFix }}" style="padding:7px 14px;border-radius:999px;border:0;background:#E0A64B;color:#0E1116;font-size:13px;font-weight:700;cursor:pointer;" style-hover="background:#F2C676">Build around Hagatha instead</button>
+                  <button style="padding:7px 14px;border-radius:999px;border:1px solid rgba(242,233,216,.15);background:transparent;color:#A9A396;font-size:13px;cursor:not-allowed;">Notify me when Wild launches</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ errApi }}" hint-placeholder-val="{{ false }}">
+            <div data-screen-label="Error: API" style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;border:1px solid rgba(228,96,86,.4);background:rgba(228,96,86,.08);animation:df-rise .3s ease;">
+              <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid #E46056;color:#E46056;display:grid;place-items:center;font-size:13px;font-weight:700;flex:none;">×</span>
+              <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+                <div style="font-weight:600;">Card data is unavailable right now.</div>
+                <div style="color:#A9A396;font-size:14px;">Blizzard’s Hearthstone API isn’t responding. Nothing is lost; your request is kept below. Last successful card sync: today, 06:10 UTC.</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+                  <button onClick="{{ retryApi }}" style="padding:7px 14px;border-radius:999px;border:1px solid rgba(242,233,216,.2);background:transparent;color:#F2E9D8;font-size:13px;font-weight:600;cursor:pointer;" style-hover="border-color:#E0A64B;color:#E0A64B">Try again</button>
+                  <a href="#" style="padding:7px 10px;font-size:13px;color:#A9A396;" style-hover="color:#E0A64B">Check Blizzard status</a>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <span style="font-size:12px;color:#7F7B72;margin-right:4px;">Try</span>
+            <sc-for list="{{ examples }}" as="e" hint-placeholder-count="4">
+              <button onClick="{{ e.use }}" style="padding:7px 14px;border-radius:999px;border:1px solid rgba(242,233,216,.12);background:rgba(242,233,216,.03);color:#D9D0BF;font-size:13px;cursor:pointer;" style-hover="border-color:rgba(224,166,75,.5);color:#F2E9D8">{{ e.text }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:40px;">
+          <div style="padding:22px;border-radius:16px;border:1px solid rgba(242,233,216,.1);background:rgba(20,26,36,.6);display:flex;flex-direction:column;gap:8px;">
+            <span style="width:34px;height:34px;border-radius:10px;background:rgba(63,185,168,.12);border:1px solid rgba(63,185,168,.3);display:grid;place-items:center;"><span style="width:10px;height:10px;border-radius:50%;background:#3FB9A8;display:block;"></span></span>
+            <div style="font-family:Spectral,Georgia,serif;font-size:20px;font-weight:500;margin-top:6px;">Live card data</div>
+            <div style="color:#A9A396;font-size:14px;text-wrap:pretty;">Synced daily from Blizzard’s Hearthstone API. New sets and nerfs show up the same day.</div>
+          </div>
+          <div style="padding:22px;border-radius:16px;border:1px solid rgba(242,233,216,.1);background:rgba(20,26,36,.6);display:flex;flex-direction:column;gap:8px;">
+            <span style="width:34px;height:34px;border-radius:10px;background:rgba(63,185,168,.12);border:1px solid rgba(63,185,168,.3);display:grid;place-items:center;"><span style="width:10px;height:10px;background:#3FB9A8;display:block;transform:rotate(45deg);border-radius:2px;"></span></span>
+            <div style="font-family:Spectral,Georgia,serif;font-size:20px;font-weight:500;margin-top:6px;">Legal &amp; validated</div>
+            <div style="color:#A9A396;font-size:14px;text-wrap:pretty;">Every deck is checked: 30 cards, copy limits, class and set legality. Invalid decks never reach you.</div>
+          </div>
+          <div style="padding:22px;border-radius:16px;border:1px solid rgba(242,233,216,.1);background:rgba(20,26,36,.6);display:flex;flex-direction:column;gap:8px;">
+            <span style="width:34px;height:34px;border-radius:10px;background:rgba(63,185,168,.12);border:1px solid rgba(63,185,168,.3);display:grid;place-items:center;"><span style="width:12px;height:8px;border:2px solid #3FB9A8;border-radius:2px;display:block;"></span></span>
+            <div style="font-family:Spectral,Georgia,serif;font-size:20px;font-weight:500;margin-top:6px;">One-click deck code</div>
+            <div style="color:#A9A396;font-size:14px;text-wrap:pretty;">Copy once, open Hearthstone, create a new deck. The code pastes itself.</div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <!-- GENERATING -->
+    <sc-if value="{{ isGenerating }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Generating" style="max-width:860px;margin:32px auto 0;display:flex;flex-direction:column;gap:20px;">
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:14px;border:1px solid rgba(242,233,216,.1);background:#141A24;">
+          <span style="width:8px;height:8px;border-radius:50%;background:{{ classColor }};display:block;flex:none;"></span>
+          <div style="flex:1;font-size:15px;color:#F2E9D8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ prompt }}</div>
+          <span style="font-size:12px;color:#7F7B72;letter-spacing:.08em;text-transform:uppercase;">Standard</span>
+          <button onClick="{{ goHome }}" style="padding:6px 12px;border-radius:999px;border:1px solid rgba(242,233,216,.15);background:transparent;color:#A9A396;font-size:13px;cursor:pointer;" style-hover="color:#F2E9D8">Cancel</button>
+        </div>
+        <div style="padding:28px 28px 24px;border-radius:16px;border:1px solid rgba(63,185,168,.25);background:linear-gradient(180deg,rgba(63,185,168,.06),rgba(20,26,36,.9));display:flex;flex-direction:column;gap:22px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;">
+            <h2 style="font-family:Spectral,Georgia,serif;font-weight:500;font-size:28px;margin:0;">Forging your deck</h2>
+            <span style="font-size:13px;color:#3FB9A8;font-variant-numeric:tabular-nums;">{{ elapsed }}</span>
+          </div>
+          <ol style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;">
+            <sc-for list="{{ steps }}" as="s" hint-placeholder-count="5">
+              <li style="display:flex;align-items:center;gap:14px;padding:11px 12px;border-radius:10px;background:{{ s.rowBg }};">
+                <span style="width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;border:1.5px solid {{ s.ringColor }};background:{{ s.dotBg }};animation:{{ s.anim }};">
+                  <sc-if value="{{ s.done }}" hint-placeholder-val="{{ false }}"><span style="width:10px;height:6px;border-left:2px solid #0E1116;border-bottom:2px solid #0E1116;transform:rotate(-45deg) translate(1px,-1px);display:block;"></span></sc-if>
+                  <sc-if value="{{ s.active }}" hint-placeholder-val="{{ false }}"><span style="width:8px;height:8px;border-radius:50%;background:#3FB9A8;display:block;"></span></sc-if>
+                </span>
+                <span style="flex:1;font-size:15.5px;color:{{ s.textColor }};font-weight:{{ s.weight }};">{{ s.label }}</span>
+                <sc-if value="{{ s.active }}" hint-placeholder-val="{{ false }}"><span style="height:4px;width:120px;border-radius:999px;background:linear-gradient(90deg,rgba(63,185,168,.15),rgba(63,185,168,.7),rgba(63,185,168,.15));background-size:200% 100%;animation:df-shimmer 1.4s linear infinite;"></span></sc-if>
+                <sc-if value="{{ s.done }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:#7F7B72;font-variant-numeric:tabular-nums;">{{ s.meta }}</span></sc-if>
+              </li>
+            </sc-for>
+          </ol>
+          <div style="font-size:13px;color:#7F7B72;">Decks are validated before you see them. If the model slips, we repair the list and re-check it.</div>
+        </div>
+      </section>
+    </sc-if>
+
+    <!-- RESULT -->
+    <sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+      <section data-screen-label="Deck result" style="margin-top:20px;display:grid;gap:24px;grid-template-columns:{{ gridCols }};grid-template-areas:{{ gridAreas }};align-items:start;">
+
+        <!-- HEAD: layout A (vertical panel) -->
+        <sc-if value="{{ isA }}" hint-placeholder-val="{{ true }}">
+          <aside style="grid-area:head;position:sticky;top:20px;display:flex;flex-direction:column;gap:18px;padding:22px;border-radius:16px;border:1px solid rgba(242,233,216,.1);background:#141A24;">
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <span style="width:48px;height:48px;border-radius:12px;background:{{ classColor }};display:grid;place-items:center;color:#0E1116;font-family:Spectral,Georgia,serif;font-weight:600;font-size:22px;flex:none;">{{ classInitial }}</span>
+              <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
+                <input value="{{ deckName }}" onChange="{{ onDeckName }}" style="background:transparent;border:0;border-bottom:1px dashed rgba(242,233,216,.2);color:#F2E9D8;font-family:Spectral,Georgia,serif;font-weight:500;font-size:22px;line-height:1.2;padding:0 0 3px;width:100%;" style-focus="border-bottom-color:#E0A64B"/>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid rgba(242,233,216,.15);color:#A9A396;">Standard</span>
+                  <span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(91,109,214,.18);color:#AEB7F0;">{{ archetype }}</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:18px;font-variant-numeric:tabular-nums;">
+              <div><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7F7B72;">Dust</div><div style="font-size:20px;font-weight:600;display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;background:#C7B9E6;transform:rotate(45deg);border-radius:1px;display:block;"></span>{{ dust }}</div></div>
+              <div><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7F7B72;">Cards</div><div style="font-size:20px;font-weight:600;">{{ cardCount }}/30</div></div>
+              <div><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7F7B72;">Avg cost</div><div style="font-size:20px;font-weight:600;">{{ avgCost }}</div></div>
+            </div>
+            <div style="position:relative;display:flex;flex-direction:column;gap:8px;">
+              <button onClick="{{ copyCode }}" style="width:100%;padding:14px 18px;border-radius:12px;border:0;background:#E0A64B;color:#0E1116;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;" style-hover="background:#F2C676" style-active="background:#C68E3A"><span style="width:12px;height:14px;border:2px solid #0E1116;border-radius:3px;display:block;box-shadow:3px -3px 0 -1px #E0A64B,3px -3px 0 1px #0E1116;"></span>Copy deck code</button>
+              <sc-if value="{{ copied }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:0;right:0;top:calc(100% + 8px);padding:10px 14px;border-radius:10px;background:#1E2A2A;border:1px solid rgba(63,185,168,.4);color:#F2E9D8;font-size:13px;display:flex;align-items:center;gap:8px;animation:df-rise .25s ease;z-index:5;"><span style="width:8px;height:5px;border-left:2px solid #3FB9A8;border-bottom:2px solid #3FB9A8;transform:rotate(-45deg);display:block;"></span>Copied — paste in Hearthstone</div></sc-if>
+            </div>
+            <details style="border-radius:10px;border:1px solid rgba(242,233,216,.1);background:#0E1116;">
+              <summary style="padding:9px 12px;font-size:12px;color:#A9A396;cursor:pointer;letter-spacing:.04em;list-style:none;display:flex;justify-content:space-between;">Deck code<span>▾</span></summary>
+              <div style="padding:0 12px 12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.5;color:#A9A396;word-break:break-all;">{{ deckstring }}</div>
+            </details>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;justify-content:space-between;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7F7B72;"><span>Mana curve</span></div>
+              <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;align-items:end;height:84px;">
+                <sc-for list="{{ curve }}" as="b" hint-placeholder-count="8">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;">
+                    <span style="font-size:11px;color:#A9A396;font-variant-numeric:tabular-nums;">{{ b.count }}</span>
+                    <div style="width:100%;height:{{ b.h }};min-height:3px;border-radius:4px 4px 2px 2px;background:linear-gradient(180deg,#5B8DEF,#3B5FC4);"></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;text-align:center;font-size:11px;color:#7F7B72;font-variant-numeric:tabular-nums;">
+                <sc-for list="{{ curve }}" as="b" hint-placeholder-count="8"><span>{{ b.label }}</span></sc-for>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onClick="{{ regenerate }}" style="flex:1;padding:9px 0;border-radius:999px;border:1px solid rgba(242,233,216,.15);background:transparent;color:#F2E9D8;font-size:13px;font-weight:600;cursor:pointer;" style-hover="border-color:#E0A64B;color:#E0A64B">Regenerate</button>
+              <button onClick="{{ focusRefine }}" style="flex:1;padding:9px 0;border-radius:999px;border:1px solid rgba(242,233,216,.15);background:transparent;color:#F2E9D8;font-size:13px;font-weight:600;cursor:pointer;" style-hover="border-color:#E0A64B;color:#E0A64B">Tweak</button>
+              <button style="flex:1;padding:9px 0;border-radius:999px;border:1px solid rgba(242,233,216,.15);background:transparent;color:#F2E9D8;font-size:13px;font-weight:600;cursor:pointer;" style-hover="border-color:#E0A64B;color:#E0A64B">Share</button>
+            </div>
+          </aside>
+        </sc-if>
+
+        <!-- HEAD: layout B (horizontal strip) -->
+        <sc-if value="{{ isB }}" hint-placeholder-val="{{ false }}">
+          <header style="grid-area:head;display:flex;align-items:center;gap:20px;padding:18px 22px;border-radius:16px;border:1px solid rgba(242,233,216,.1);background:#141A24;flex-wrap:wrap;">
+            <span style="width:52px;height:52px;border-radius:14px;background:{{ classColor }};display:grid;place-items:center;color:#0E1116;font-family:Spectral,Georgia,serif;font-weight:600;font-size:24px;flex:none;">{{ classInitial }}</span>
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:220px;flex:1;">
+              <input value="{{ deckName }}" onChange="{{ onDeckName }}" style="background:transparent;border:0;border-bottom:1px dashed rgba(242,233,216,.2);color:#F2E9D8;font-family:Spectral,Georgia,serif;font-weight:500;font-size:26px;line-height:1.2;padding:0 0 3px;max-width:420px;" style-focus="border-bottom-color:#E0A64B"/>
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                <span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid rgba(242,233,216,.15);color:#A9A396;">Standard</span>
+                <span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(91,109,214,.18);color:#AEB7F0;">{{ archetype }}</span>
+                <span style="font-size:13px;color:#A9A396;margin-left:6px;font-variant-numeric:tabular-nums;display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;background:#C7B9E6;transform:rotate(45deg);border-radius:1px;display:block;"></span>{{ dust }} dust</span>
+                <span style="font-size:13px;color:#A9A396;font-variant-numeric:tabular-nums;">· {{ cardCount }}/30 · avg {{ avgCost }}</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button onClick="{{ regenerate }}" style="padding:9px 16px;border-radius:999px;border:1px solid rgba(242,233,216,.15);background:transparent;color:#F2E9D8;font-size:13px;font-weight:600;cursor:pointer;" style-hover="border-color:#E0A64B;color:#E0A64B">Regenerate</button>
+              <button onClick="{{ focusRefine }}" style="padding:9px 16px;border-radius:999px;border:1px solid rgba(242,233,216,.15);background:transparent;color:#F2E9D8;font-size:13px;font-weight:600;cursor:pointer;" style-hover="border-color:#E0A64B;color:#E0A64B">Tweak</button>
+              <button style="padding:9px 16px;border-radius:999px;border:1px solid rgba(242,233,216,.15);background:transparent;color:#F2E9D8;font-size:13px;font-weight:600;cursor:pointer;" style-hover="border-color:#E0A64B;color:#E0A64B">Share</button>
+              <div style="position:relative;">
+                <button onClick="{{ copyCode }}" style="padding:12px 22px;border-radius:999px;border:0;background:#E0A64B;color:#0E1116;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;white-space:nowrap;" style-hover="background:#F2C676" style-active="background:#C68E3A">Copy deck code</button>
+                <sc-if value="{{ copied }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;right:0;top:calc(100% + 8px);padding:10px 14px;border-radius:10px;background:#1E2A2A;border:1px solid rgba(63,185,168,.4);color:#F2E9D8;font-size:13px;display:flex;align-items:center;gap:8px;white-space:nowrap;animation:df-rise .25s ease;z-index:5;"><span style="width:8px;height:5px;border-left:2px solid #3FB9A8;border-bottom:2px solid #3FB9A8;transform:rotate(-45deg);display:block;"></span>Copied — paste in Hearthstone</div></sc-if>
+              </div>
+            </div>
+          </header>
+        </sc-if>
+
+        <!-- CARDS -->
+        <div style="grid-area:cards;display:flex;flex-direction:column;gap:14px;min-width:0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div style="font-family:Spectral,Georgia,serif;font-size:22px;font-weight:500;">Cards <span style="color:#7F7B72;font-size:16px;font-family:Manrope,sans-serif;font-variant-numeric:tabular-nums;">{{ cardCount }}</span></div>
+            <div style="display:inline-flex;border:1px solid rgba(242,233,216,.12);border-radius:999px;padding:3px;gap:2px;">
+              <button onClick="{{ setList }}" style="padding:5px 14px;border-radius:999px;border:0;background:{{ listBg }};color:{{ listFg }};font-size:13px;font-weight:600;cursor:pointer;">List</button>
+              <button onClick="{{ setGrid }}" style="padding:5px 14px;border-radius:999px;border:0;background:{{ gridBg }};color:{{ gridFg }};font-size:13px;font-weight:600;cursor:pointer;">Card art</button>
+            </div>
+          </div>
+
+          <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ groups }}" as="g" hint-placeholder-count="7">
+                <div style="border-radius:14px;border:1px solid rgba(242,233,216,.08);background:rgba(20,26,36,.7);overflow:visible;">
+                  <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7F7B72;border-bottom:1px solid rgba(242,233,216,.06);"><span>{{ g.label }}</span><span style="flex:1;"></span><span style="font-variant-numeric:tabular-nums;">{{ g.count }} cards</span></div>
+                  <sc-for list="{{ g.cards }}" as="card" hint-placeholder-count="3">
+                    <div onMouseEnter="{{ card.enter }}" onMouseLeave="{{ card.leave }}" style="position:relative;display:flex;align-items:center;gap:12px;padding:9px 14px;border-left:3px solid {{ card.rarityColor }};background:{{ card.rowBg }};" style-hover="background:rgba(242,233,216,.04)">
+                      <span style="width:28px;height:28px;flex:none;display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;background:linear-gradient(160deg,#5B8DEF,#2F4FB0);clip-path:polygon(50% 0,95% 28%,95% 72%,50% 100%,5% 72%,5% 28%);">{{ card.cost }}</span>
+                      <span style="flex:1;font-size:15px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ card.name }}</span>
+                      <span style="font-size:12px;color:#7F7B72;">{{ card.type }}</span>
+                      <sc-if value="{{ card.isClass }}" hint-placeholder-val="{{ false }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ classColor }};display:block;"></span></sc-if>
+                      <span style="width:10px;height:10px;border-radius:50%;background:{{ card.rarityColor }};box-shadow:0 0 0 2px rgba(0,0,0,.35) inset;display:block;"></span>
+                      <span style="width:30px;text-align:right;font-size:13px;color:{{ card.countColor }};font-weight:600;font-variant-numeric:tabular-nums;">×{{ card.count }}</span>
+                      <sc-if value="{{ card.hovered }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:absolute;right:calc(100% + 12px);top:50%;transform:translateY(-50%);width:200px;height:280px;border-radius:12px;border:1px solid rgba(242,233,216,.15);background:repeating-linear-gradient(135deg,#1A2130 0 6px,#1F2736 6px 12px);box-shadow:0 20px 50px rgba(0,0,0,.5);z-index:10;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;gap:4px;animation:df-rise .15s ease;">
+                          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#7F7B72;">card art · {{ card.name }}</div>
+                          <div style="font-size:12px;color:#A9A396;">{{ card.cost }} mana · {{ card.rarity }} · {{ card.type }}</div>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isGrid }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:12px;">
+              <sc-for list="{{ flatCards }}" as="card" hint-placeholder-count="12">
+                <div style="position:relative;aspect-ratio:3/4;border-radius:12px;border:1px solid rgba(242,233,216,.12);background:repeating-linear-gradient(135deg,#1A2130 0 6px,#1F2736 6px 12px);display:flex;flex-direction:column;justify-content:flex-end;padding:10px;gap:4px;overflow:hidden;" style-hover="border-color:rgba(224,166,75,.5)">
+                  <span style="position:absolute;top:8px;left:8px;width:26px;height:26px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:12px;background:linear-gradient(160deg,#5B8DEF,#2F4FB0);clip-path:polygon(50% 0,95% 28%,95% 72%,50% 100%,5% 72%,5% 28%);">{{ card.cost }}</span>
+                  <span style="position:absolute;top:8px;right:8px;padding:2px 7px;border-radius:999px;background:rgba(14,17,22,.85);font-size:11px;font-weight:700;color:{{ card.countColor }};">×{{ card.count }}</span>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#7F7B72;">card art</div>
+                  <div style="font-size:12.5px;font-weight:600;line-height:1.25;display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:{{ card.rarityColor }};flex:none;display:block;"></span><span>{{ card.name }}</span></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- WHY -->
+        <div style="grid-area:why;display:flex;flex-direction:column;gap:14px;min-width:0;">
+          <sc-if value="{{ isB }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:18px;border-radius:14px;border:1px solid rgba(242,233,216,.1);background:#141A24;display:flex;flex-direction:column;gap:10px;">
+              <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7F7B72;">Mana curve</div>
+              <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;align-items:end;height:84px;">
+                <sc-for list="{{ curve }}" as="b" hint-placeholder-count="8">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;">
+                    <span style="font-size:11px;color:#A9A396;font-variant-numeric:tabular-nums;">{{ b.count }}</span>
+                    <div style="width:100%;height:{{ b.h }};min-height:3px;border-radius:4px 4px 2px 2px;background:linear-gradient(180deg,#5B8DEF,#3B5FC4);"></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;text-align:center;font-size:11px;color:#7F7B72;font-variant-numeric:tabular-nums;">
+                <sc-for list="{{ curve }}" as="b" hint-placeholder-count="8"><span>{{ b.label }}</span></sc-for>
+              </div>
+              <details style="border-radius:10px;border:1px solid rgba(242,233,216,.1);background:#0E1116;margin-top:4px;">
+                <summary style="padding:9px 12px;font-size:12px;color:#A9A396;cursor:pointer;letter-spacing:.04em;list-style:none;display:flex;justify-content:space-between;">Deck code<span>▾</span></summary>
+                <div style="padding:0 12px 12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.5;color:#A9A396;word-break:break-all;">{{ deckstring }}</div>
+              </details>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#3FB9A8;display:block;"></span>
+            <div style="font-family:Spectral,Georgia,serif;font-size:22px;font-weight:500;">Why these cards</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="4">
+              <div style="border-radius:14px;border:1px solid rgba(242,233,216,.08);background:rgba(20,26,36,.7);overflow:hidden;">
+                <button onClick="{{ sec.toggle }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:13px 16px;background:transparent;border:0;color:#F2E9D8;cursor:pointer;text-align:left;font-size:15px;font-weight:600;" style-hover="background:rgba(242,233,216,.03)"><span style="flex:1;">{{ sec.title }}</span><span style="color:#7F7B72;font-size:12px;transform:{{ sec.chev }};display:block;transition:transform .2s;">▾</span></button>
+                <sc-if value="{{ sec.open }}" hint-placeholder-val="{{ true }}">
+                  <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px;">
+                    <sc-for list="{{ sec.paras }}" as="p" hint-placeholder-count="2"><p style="margin:0;font-size:14.5px;color:#D9D0BF;text-wrap:pretty;">{{ p }}</p></sc-for>
+                    <sc-for list="{{ sec.swaps }}" as="sw" hint-placeholder-count="0">
+                      <div style="display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:#0E1116;border:1px solid rgba(242,233,216,.08);">
+                        <div style="display:flex;flex-direction:column;gap:2px;min-width:0;"><span style="font-size:14px;font-weight:600;text-decoration:{{ sw.outDeco }};color:{{ sw.outColor }};">{{ sw.out }}</span><span style="font-size:12px;color:#7F7B72;">{{ sw.why }}</span></div>
+                        <span style="color:#7F7B72;">→</span>
+                        <div style="font-size:14px;font-weight:600;color:{{ sw.inColor }};">{{ sw.in }}</div>
+                        <button onClick="{{ sw.apply }}" style="padding:6px 14px;border-radius:999px;border:1px solid {{ sw.btnBorder }};background:{{ sw.btnBg }};color:{{ sw.btnFg }};font-size:12.5px;font-weight:700;cursor:pointer;" style-hover="border-color:#E0A64B">{{ sw.btnLabel }}</button>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- THREAD / REFINE -->
+        <div style="grid-area:thread;display:flex;flex-direction:column;gap:14px;min-width:0;" data-screen-label="Refine thread">
+          <div style="font-family:Spectral,Georgia,serif;font-size:22px;font-weight:500;">Refine</div>
+          <sc-for list="{{ thread }}" as="t" hint-placeholder-count="0">
+            <div style="display:flex;flex-direction:column;gap:10px;animation:df-rise .3s ease;">
+              <div style="align-self:flex-end;max-width:70%;padding:10px 16px;border-radius:16px 16px 4px 16px;background:rgba(224,166,75,.14);border:1px solid rgba(224,166,75,.3);font-size:14.5px;">{{ t.user }}</div>
+              <div style="align-self:flex-start;max-width:min(720px,100%);padding:16px 18px;border-radius:16px 16px 16px 4px;background:#141A24;border:1px solid rgba(242,233,216,.1);display:flex;flex-direction:column;gap:12px;">
+                <div style="font-size:14.5px;color:#D9D0BF;text-wrap:pretty;">{{ t.reply }}</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#E46056;">Removed</div>
+                    <sc-for list="{{ t.removed }}" as="r" hint-placeholder-count="2"><div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(228,96,86,.08);border:1px solid rgba(228,96,86,.25);font-size:13.5px;"><span style="color:#E46056;font-weight:700;">−</span><span style="flex:1;text-decoration:line-through;color:#D9D0BF;">{{ r.name }}</span><span style="color:#7F7B72;font-variant-numeric:tabular-nums;">×{{ r.count }}</span></div></sc-for>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#4FBF7F;">Added</div>
+                    <sc-for list="{{ t.added }}" as="r" hint-placeholder-count="2"><div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(79,191,127,.08);border:1px solid rgba(79,191,127,.25);font-size:13.5px;"><span style="color:#4FBF7F;font-weight:700;">+</span><span style="flex:1;">{{ r.name }}</span><span style="color:#7F7B72;font-variant-numeric:tabular-nums;">×{{ r.count }}</span></div></sc-for>
+                  </div>
+                </div>
+                <div style="font-size:12px;color:#7F7B72;">Deck re-validated · new code ready · {{ t.dustDelta }}</div>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ refining }}" hint-placeholder-val="{{ false }}">
+            <div style="align-self:flex-start;display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:16px 16px 16px 4px;background:#141A24;border:1px solid rgba(63,185,168,.3);font-size:13px;color:#3FB9A8;"><span style="width:8px;height:8px;border-radius:50%;background:#3FB9A8;animation:df-pulse 1.2s ease infinite;display:block;"></span>Rebuilding and validating…</div>
+          </sc-if>
+          <div style="display:flex;gap:10px;align-items:center;padding:8px 8px 8px 18px;border-radius:999px;border:1px solid rgba(242,233,216,.12);background:#141A24;" style-focus="border-color:rgba(224,166,75,.5)">
+            <input ref="{{ refineRef }}" value="{{ refineText }}" onChange="{{ onRefine }}" onKeyDown="{{ onRefineKey }}" placeholder="Make it cheaper · Remove Walking Mountain · More board clears" style="flex:1;background:transparent;border:0;color:#F2E9D8;font-size:15px;min-width:0;"/>
+            <button onClick="{{ sendRefine }}" style="padding:9px 18px;border-radius:999px;border:0;background:rgba(224,166,75,.14);color:#E0A64B;font-size:13.5px;font-weight:700;cursor:pointer;" style-hover="background:#E0A64B;color:#0E1116">Refine</button>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+
+  <footer style="position:relative;max-width:1440px;width:100%;margin:0 auto;padding:22px 48px 32px;box-sizing:border-box;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;border-top:1px solid rgba(242,233,216,.08);font-size:12px;color:#7F7B72;">
+    <span>DeckForge is a fan-made tool and is not affiliated with or endorsed by Blizzard Entertainment. Hearthstone is a trademark of Blizzard Entertainment, Inc. Card data via the Blizzard Game Data API.</span>
+    <span style="display:flex;gap:16px;"><a href="#" style="color:#7F7B72;" style-hover="color:#E0A64B">About</a><a href="#" style="color:#7F7B72;" style-hover="color:#E0A64B">Privacy</a></span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;landing&quot;,&quot;options&quot;:[&quot;landing&quot;,&quot;generating&quot;,&quot;result&quot;,&quot;refine&quot;,&quot;error-vague&quot;,&quot;error-rotated&quot;,&quot;error-api&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;resultLayout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;sidebar&quot;,&quot;options&quot;:[&quot;sidebar&quot;,&quot;dashboard&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Result page&quot;},&quot;frozen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototype&quot;}}">
+const CLASSES = [
+  ['Mage','#69CCF0'],['Warrior','#C9433F'],['Hunter','#8BC34A'],['Paladin','#F5C542'],['Priest','#D8D8E8'],['Rogue','#8A8A94'],
+  ['Shaman','#5B6DD6'],['Warlock','#9482C9'],['Druid','#A2673F'],['Demon Hunter','#2FBF71'],['Death Knight','#3C9AB0']
+];
+const RARITY = { common:'#9D9D9D', rare:'#4C8DF5', epic:'#A335EE', legendary:'#FF8000' };
+const DUST = { common:40, rare:100, epic:400, legendary:1600 };
+const C = (name,cost,rarity,count,type,cls) => ({ name, cost, rarity, count, type, cls: cls || 'Shaman' });
+const BASE_DECK = [
+  C('Pop-Up Book',1,'common',2,'Spell'), C('Murloc Growfin',1,'common',2,'Minion','Neutral'),
+  C('Needlerock Totem',2,'common',2,'Minion'), C('Flowrider',2,'rare',2,'Minion'), C('Cactus Cutter',2,'common',2,'Minion'),
+  C('Turn the Tides',3,'common',2,'Spell'), C("Hagatha's Embrace",3,'rare',2,'Spell'), C('Fairy Tale Forest',3,'legendary',1,'Location'),
+  C('Baking Soda Volcano',4,'rare',2,'Spell'), C('Backstage Bouncer',4,'common',2,'Minion'),
+  C('Horn of the Windlord',5,'legendary',1,'Weapon'), C('Siren Song',5,'epic',2,'Spell'),
+  C('Hagatha the Fabled',6,'legendary',1,'Minion'), C('Golganneth, the Thunderer',6,'legendary',1,'Minion'), C('Incindius',6,'legendary',1,'Minion','Neutral'),
+  C('Shudderblock',7,'legendary',1,'Minion'), C('Ultraviolet Breaker',7,'epic',2,'Minion','Neutral'),
+  C('Shudderwock',9,'legendary',1,'Minion'), C('Walking Mountain',9,'legendary',1,'Minion'),
+];
+const STEPS = [
+  ['Reading your request','0.4s'], ['Searching 1,600 Standard cards','312 candidates'], ['Choosing synergies','30 cards'], ['Validating deck','legal'], ['Encoding deck code','done']
+];
+const EXAMPLES = [
+  'Build a Standard Shaman deck around Shudderwock', 'Cheap aggro Hunter under 3000 dust', 'Control Warrior with lots of armor', 'Dragon Priest, no legendaries'
+];
+const SECTIONS = [
+  { id:'plan', title:'Game plan', paras:['Survive the early turns with cheap totems and Turn the Tides, then chain Battlecry minions from turn 5 onward. Shudderwock on turn 9 replays every Battlecry you have made, so the deck wins by value, not tempo.','Against aggro, treat Baking Soda Volcano and Hagatha\'s Embrace as your stabilisers and hold Shudderwock for the game-ending turn.'] },
+  { id:'syn', title:'Core synergy', paras:['Golganneth and Hagatha the Fabled are the Battlecries that matter: both generate card advantage that Shudderwock doubles. Shudderblock triples the next Battlecry, so Shudderblock into Golganneth is the strongest two-turn line in the deck.'] },
+  { id:'mull', title:'Mulligan tips', paras:['Always keep Needlerock Totem, Flowrider and one Turn the Tides. Keep Hagatha\'s Embrace against aggro. Throw back Shudderwock, Walking Mountain and Incindius every time; you have the card draw to find them.'] },
+  { id:'swaps', title:'Possible swaps', paras:['If you are short on dust or facing a faster meta, these one-for-one swaps keep the deck legal.'] },
+];
+const SWAPS = [
+  { out:'Walking Mountain', in:'Zilliax Deluxe 3000', why:'Saves 1,600 dust if you already own Zilliax', inCard:C('Zilliax Deluxe 3000',5,'legendary',1,'Minion','Neutral') },
+  { out:'Siren Song', in:'Hex', why:'More answers to single big threats', inCard:C('Hex',4,'common',2,'Spell') },
+];
+const DECKSTRING = 'AAECAaoIBpqdBrvhBtfkBo70BtL6BvCGBwz+ngS/qQX8vAX9vAW4yAWRzQXS0AXW0AXp0QXd6AWS7gWs7gUAAQPywwX+ngT6wwX+ngT8wwX+ngQAAA==';
+
+class Component extends DCLogic {
+  state = {
+    screen: this.props.screen && this.props.screen.startsWith('error') ? 'landing' : (this.props.screen || 'landing'),
+    error: this.props.screen && this.props.screen.startsWith('error') ? this.props.screen.slice(6) : null,
+    prompt: ({ 'error-vague':'aggro', 'error-rotated':'N\'Zoth Shaman for Standard', 'error-api':'Build a Standard Shaman deck around Shudderwock', landing:'', undefined:'' })[this.props.screen] ?? 'Build a Standard Shaman deck around Shudderwock',
+    cls: 'Shaman', deckName: 'Shudderwock Shaman', view: 'list', copied: false,
+    stepIdx: this.props.frozen ? 2 : 0, elapsed: this.props.frozen ? 6.2 : 0,
+    deck: BASE_DECK.map(c => ({...c})), hover: null, open: { plan:true, syn:true, mull:false, swaps:true }, applied: {},
+    thread: this.props.screen === 'refine' ? [this.cheaperEntry(BASE_DECK)] : [], refineText: '', refining: false,
+  };
+  refineRef = React.createRef();
+  componentDidMount(){ if (this.state.screen === 'generating' && !this.props.frozen) this.startGen(); if (this.props.screen === 'refine') this.setState({ screen:'result', deck: this.applyDiff(BASE_DECK.map(c=>({...c})), this.cheaperEntry(BASE_DECK)) }); }
+  componentDidUpdate(_, prev){ if (prev.screen !== 'generating' && this.state.screen === 'generating' && !this.props.frozen) this.startGen(); }
+  componentWillUnmount(){ clearInterval(this.timer); clearInterval(this.clock); }
+  startGen(){
+    clearInterval(this.timer); clearInterval(this.clock);
+    this.setState({ stepIdx:0, elapsed:0 });
+    this.clock = setInterval(() => this.setState(s => ({ elapsed: s.elapsed + 0.1 })), 100);
+    this.timer = setInterval(() => this.setState(s => {
+      const n = s.stepIdx + 1;
+      if (n >= STEPS.length) { clearInterval(this.timer); clearInterval(this.clock); return { screen:'result', stepIdx:n, copied:false }; }
+      return { stepIdx:n };
+    }), 1100);
+  }
+  cheaperEntry(deck){
+    return { user:'Make it cheaper', reply:'Cut the two neutral legendaries and Ultraviolet Breaker. The curve is lower and the Shudderwock turn now leans on Hagatha\'s Embrace instead of Golganneth.',
+      removed:[{name:'Golganneth, the Thunderer',count:1},{name:'Incindius',count:1},{name:'Ultraviolet Breaker',count:2}],
+      added:[{name:'Spirit Claws',count:2,card:C('Spirit Claws',1,'common',2,'Weapon')},{name:'Lightning Bolt',count:2,card:C('Lightning Bolt',1,'common',2,'Spell')}], dustDelta:'−3,920 dust' };
+  }
+  applyDiff(deck, e){
+    let d = deck.filter(c => !e.removed.some(r => r.name === c.name && r.count >= c.count)).map(c => { const r = e.removed.find(r => r.name === c.name); return r ? {...c, count:c.count - r.count} : c; });
+    e.added.forEach(a => { const ex = d.find(c => c.name === a.name); if (ex) ex.count = Math.min(2, ex.count + a.count); else d.push({...a.card, count:a.count}); });
+    return d;
+  }
+  dustOf(d){ return d.reduce((s,c) => s + DUST[c.rarity]*c.count, 0); }
+  makeEntry(text, deck){
+    const t = text.toLowerCase();
+    if (t.includes('cheap') || t.includes('dust') || t.includes('budget')) return this.cheaperEntry(deck);
+    const rm = t.match(/(?:remove|cut|drop|replace)\s+(.+)/);
+    if (rm) {
+      const target = deck.find(c => c.name.toLowerCase().includes(rm[1].trim().replace(/[.!]$/,'')));
+      if (target) return { user:text, reply:`Removed ${target.name}. Lightning Bolt fills the slot: cheap, keeps the removal count, and is replayed by Shudderwock for face damage.`, removed:[{name:target.name,count:target.count}], added:[{name:'Lightning Bolt',count:target.count,card:C('Lightning Bolt',1,'common',target.count,'Spell')}], dustDelta:`−${(DUST[target.rarity]-40)*target.count} dust` };
+    }
+    return { user:text, reply:'Swapped Siren Song for Hex. Hex answers a single large minion without conditions and costs one less, which keeps the Shudderwock turn safer against big boards.', removed:[{name:'Siren Song',count:2}], added:[{name:'Hex',count:2,card:C('Hex',4,'common',2,'Spell')}], dustDelta:'−720 dust' };
+  }
+  sendRefine = () => {
+    const text = this.state.refineText.trim(); if (!text || this.state.refining) return;
+    this.setState({ refining:true, refineText:'' });
+    setTimeout(() => this.setState(s => { const e = this.makeEntry(text, s.deck); return { refining:false, thread:[...s.thread, e], deck:this.applyDiff(s.deck, e) }; }), 1400);
+  };
+  forge = () => {
+    const p = this.state.prompt.trim();
+    if (p.toLowerCase().includes('offline')) return this.setState({ error:'api' });
+    if (/n'?zoth/i.test(p)) return this.setState({ error:'rotated' });
+    if (p.length < 12 || !/[A-Z]/.test(p)) return this.setState({ error:'vague' });
+    const cls = CLASSES.find(([n]) => p.toLowerCase().includes(n.toLowerCase()));
+    this.setState({ error:null, screen:'generating', cls: cls ? cls[0] : this.state.cls });
+  };
+  renderVals(){
+    const s = this.state, layout = this.props.resultLayout || 'sidebar', isA = layout === 'sidebar';
+    const clsColor = (CLASSES.find(([n]) => n === s.cls) || CLASSES[6])[1];
+    const sorted = [...s.deck].sort((a,b) => a.cost - b.cost || a.name.localeCompare(b.name));
+    const groupsMap = {};
+    sorted.forEach(c => { const k = Math.min(c.cost, 7); (groupsMap[k] = groupsMap[k] || []).push(c); });
+    const mk = c => ({ ...c, rarityColor: RARITY[c.rarity], isClass: c.cls !== 'Neutral', countColor: c.count === 2 ? '#F2E9D8' : '#A9A396', hovered: s.hover === c.name, rowBg: s.hover === c.name ? 'rgba(242,233,216,.04)' : 'transparent',
+      enter: () => this.setState({ hover:c.name }), leave: () => this.setState({ hover:null }) });
+    const groups = Object.keys(groupsMap).sort((a,b)=>a-b).map(k => ({ label: k == 7 ? '7+ mana' : `${k} mana`, count: groupsMap[k].reduce((n,c)=>n+c.count,0), cards: groupsMap[k].map(mk) }));
+    const curveCounts = Array.from({length:8}, (_,i) => sorted.filter(c => Math.min(c.cost,7) === i).reduce((n,c)=>n+c.count,0));
+    const max = Math.max(1, ...curveCounts);
+    const cardCount = sorted.reduce((n,c)=>n+c.count,0);
+    const avg = (sorted.reduce((n,c)=>n+c.cost*c.count,0) / Math.max(1,cardCount)).toFixed(1);
+    return {
+      isLanding: s.screen === 'landing', isGenerating: s.screen === 'generating', isResult: s.screen === 'result',
+      errVague: s.screen === 'landing' && s.error === 'vague', errRotated: s.screen === 'landing' && s.error === 'rotated', errApi: s.screen === 'landing' && s.error === 'api',
+      prompt: s.prompt, onPrompt: e => this.setState({ prompt:e.target.value, error:null }),
+      onPromptKey: e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) this.forge(); },
+      forge: this.forge, goHome: e => { e && e.preventDefault(); clearInterval(this.timer); clearInterval(this.clock); this.setState({ screen:'landing', error:null, prompt:'', thread:[], deck: BASE_DECK.map(c=>({...c})), applied:{}, copied:false }); },
+      classChips: CLASSES.map(([name,color]) => ({ name, color, border: s.cls === name ? color : 'rgba(242,233,216,.12)', bg: s.cls === name ? color + '22' : 'transparent', fg: s.cls === name ? '#F2E9D8' : '#A9A396', pick: () => this.setState({ cls: s.cls === name ? null : name }) })),
+      examples: EXAMPLES.map(text => ({ text, use: () => this.setState({ prompt:text, error:null }) })),
+      vagueFixes: ['Aggro Hunter under 3000 dust','Aggro Paladin with Divine Shield','Aggro Shaman around Fairy Tale Forest'].map(text => ({ text, use: () => this.setState({ prompt:text, error:null }) })),
+      useRotatedFix: () => this.setState({ prompt:'Build a Standard Shaman deck around Hagatha the Fabled', error:null }),
+      retryApi: () => this.setState({ error:null, screen:'generating' }),
+      classColor: clsColor, classInitial: (s.cls || 'S')[0],
+      elapsed: s.elapsed.toFixed(1) + 's',
+      steps: STEPS.map(([label,meta],i) => { const done = i < s.stepIdx, active = i === s.stepIdx; return { label, meta, done, active,
+        rowBg: active ? 'rgba(63,185,168,.07)' : 'transparent', ringColor: done ? '#3FB9A8' : active ? '#3FB9A8' : 'rgba(242,233,216,.2)', dotBg: done ? '#3FB9A8' : 'transparent',
+        anim: active ? 'df-pulse 1.4s ease infinite' : 'none', textColor: done ? '#A9A396' : active ? '#F2E9D8' : '#7F7B72', weight: active ? 600 : 500 }; }),
+      isA, isB: !isA, gridCols: isA ? 'minmax(300px,340px) minmax(0,1fr)' : 'minmax(0,1fr) minmax(300px,380px)',
+      gridAreas: isA ? '"head cards" "head why" "head thread"' : '"head head" "cards why" "thread thread"',
+      deckName: s.deckName, onDeckName: e => this.setState({ deckName:e.target.value }), archetype: 'Combo',
+      dust: this.dustOf(sorted).toLocaleString('en-US'), cardCount, avgCost: avg, deckstring: DECKSTRING,
+      copyCode: () => { try { navigator.clipboard && navigator.clipboard.writeText(DECKSTRING); } catch(e){} this.setState({ copied:true }); clearTimeout(this.toast); this.toast = setTimeout(() => this.setState({ copied:false }), 2200); },
+      copied: s.copied,
+      curve: curveCounts.map((n,i) => ({ count:n, label: i === 7 ? '7+' : String(i), h: Math.round(n / max * 100) + '%' })),
+      regenerate: () => this.setState({ screen:'generating', deck: BASE_DECK.map(c=>({...c})), thread:[], applied:{} }),
+      focusRefine: () => { const el = this.refineRef.current; if (el) { el.focus(); } },
+      isList: s.view === 'list', isGrid: s.view === 'grid', setList: () => this.setState({ view:'list' }), setGrid: () => this.setState({ view:'grid' }),
+      listBg: s.view === 'list' ? 'rgba(242,233,216,.1)' : 'transparent', listFg: s.view === 'list' ? '#F2E9D8' : '#A9A396',
+      gridBg: s.view === 'grid' ? 'rgba(242,233,216,.1)' : 'transparent', gridFg: s.view === 'grid' ? '#F2E9D8' : '#A9A396',
+      groups, flatCards: sorted.map(mk),
+      sections: SECTIONS.map(sec => ({ ...sec, open: !!s.open[sec.id], chev: s.open[sec.id] ? 'rotate(180deg)' : 'none', toggle: () => this.setState(st => ({ open: {...st.open, [sec.id]: !st.open[sec.id]} })),
+        swaps: sec.id !== 'swaps' ? [] : SWAPS.map(sw => { const done = !!s.applied[sw.out]; return { ...sw, outDeco: done ? 'line-through' : 'none', outColor: done ? '#7F7B72' : '#F2E9D8', inColor: done ? '#4FBF7F' : '#F2E9D8',
+          btnLabel: done ? 'Swapped' : 'Swap', btnBorder: done ? 'rgba(79,191,127,.4)' : 'rgba(242,233,216,.2)', btnBg: done ? 'rgba(79,191,127,.1)' : 'transparent', btnFg: done ? '#4FBF7F' : '#F2E9D8',
+          apply: () => { if (done) return; this.setState(st => { const tgt = st.deck.find(c => c.name === sw.out); const e = { removed:[{name:sw.out,count:tgt ? tgt.count : 1}], added:[{name:sw.in,count:sw.inCard.count,card:sw.inCard}] }; return { applied:{...st.applied,[sw.out]:true}, deck:this.applyDiff(st.deck, e) }; }); } }; }) })),
+      thread: s.thread, refining: s.refining, refineText: s.refineText, refineRef: this.refineRef,
+      onRefine: e => this.setState({ refineText:e.target.value }), onRefineKey: e => { if (e.key === 'Enter') this.sendRefine(); }, sendRefine: this.sendRefine,
+    };
+  }
+}
+</script>
+</body>
+</html>

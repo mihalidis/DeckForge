@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#07090C;color:#F2E9D8;font-family:Manrope,system-ui,sans-serif}a{color:#E0A64B;text-decoration:none}a:hover{color:#F2C676}</style>
+</helmet>
+<section style="padding:48px;display:flex;flex-direction:column;gap:40px;">
+  <div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7F7B72;font-weight:700;">Turn 1</div><div style="font-size:22px;font-weight:700;">DeckForge — desktop 1440</div><div style="font-size:14px;color:#A9A396;">Open <a href="DeckForge.dc.html">the clickable prototype</a> for the live flow. Result page comes in two directions: <a href="#1c">1c</a> sidebar and <a href="#1d">1d</a> dashboard.</div></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start;">
+    <div id="1a" style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;"><span style="padding:3px 9px;border-radius:999px;background:#E0A64B;color:#0E1116;font-size:12px;font-weight:700;">1a</span><span style="font-size:14px;font-weight:700;">Landing / Prompt</span></div>
+      <div style="width:1440px;border-radius:12px;overflow:hidden;border:1px solid rgba(242,233,216,.1);"><dc-import name="DeckForge" screen="landing" frozen="{{ true }}" hint-size="1440px,900px"></dc-import></div>
+    </div>
+    <div id="1b" style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;"><span style="padding:3px 9px;border-radius:999px;background:#E0A64B;color:#0E1116;font-size:12px;font-weight:700;">1b</span><span style="font-size:14px;font-weight:700;">Generating state</span></div>
+      <div style="width:1440px;border-radius:12px;overflow:hidden;border:1px solid rgba(242,233,216,.1);"><dc-import name="DeckForge" screen="generating" frozen="{{ true }}" hint-size="1440px,700px"></dc-import></div>
+    </div>
+    <div id="1c" style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;"><span style="padding:3px 9px;border-radius:999px;background:#E0A64B;color:#0E1116;font-size:12px;font-weight:700;">1c</span><span style="font-size:14px;font-weight:700;">Deck result — direction A, sticky sidebar</span><span style="font-size:13px;color:#A9A396;">Deck header, code, curve and actions pinned left; cards and explanation scroll right.</span></div>
+      <div style="width:1440px;border-radius:12px;overflow:hidden;border:1px solid rgba(242,233,216,.1);"><dc-import name="DeckForge" screen="result" result-layout="sidebar" frozen="{{ true }}" hint-size="1440px,1400px"></dc-import></div>
+    </div>
+    <div id="1d" style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;"><span style="padding:3px 9px;border-radius:999px;background:#E0A64B;color:#0E1116;font-size:12px;font-weight:700;">1d</span><span style="font-size:14px;font-weight:700;">Deck result — direction B, dashboard</span><span style="font-size:13px;color:#A9A396;">Header strip with the copy action top-right; cards wide, “Why these cards” as a right rail.</span></div>
+      <div style="width:1440px;border-radius:12px;overflow:hidden;border:1px solid rgba(242,233,216,.1);"><dc-import name="DeckForge" screen="result" result-layout="dashboard" frozen="{{ true }}" hint-size="1440px,1400px"></dc-import></div>
+    </div>
+    <div id="1e" style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;"><span style="padding:3px 9px;border-radius:999px;background:#E0A64B;color:#0E1116;font-size:12px;font-weight:700;">1e</span><span style="font-size:14px;font-weight:700;">Follow-up / refine with diff</span></div>
+      <div style="width:1440px;border-radius:12px;overflow:hidden;border:1px solid rgba(242,233,216,.1);"><dc-import name="DeckForge" screen="refine" result-layout="sidebar" frozen="{{ true }}" hint-size="1440px,1600px"></dc-import></div>
+    </div>
+    <div id="1f" style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;"><span style="padding:3px 9px;border-radius:999px;background:#E0A64B;color:#0E1116;font-size:12px;font-weight:700;">1f</span><span style="font-size:14px;font-weight:700;">Error — prompt too vague</span></div>
+      <div style="width:1440px;border-radius:12px;overflow:hidden;border:1px solid rgba(242,233,216,.1);"><dc-import name="DeckForge" screen="error-vague" frozen="{{ true }}" hint-size="1440px,900px"></dc-import></div>
+    </div>
+    <div id="1g" style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;"><span style="padding:3px 9px;border-radius:999px;background:#E0A64B;color:#0E1116;font-size:12px;font-weight:700;">1g</span><span style="font-size:14px;font-weight:700;">Error — card rotated out of Standard</span></div>
+      <div style="width:1440px;border-radius:12px;overflow:hidden;border:1px solid rgba(242,233,216,.1);"><dc-import name="DeckForge" screen="error-rotated" frozen="{{ true }}" hint-size="1440px,900px"></dc-import></div>
+    </div>
+    <div id="1h" style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;"><span style="padding:3px 9px;border-radius:999px;background:#E0A64B;color:#0E1116;font-size:12px;font-weight:700;">1h</span><span style="font-size:14px;font-weight:700;">Error — Blizzard API unavailable</span></div>
+      <div style="width:1440px;border-radius:12px;overflow:hidden;border:1px solid rgba(242,233,216,.1);"><dc-import name="DeckForge" screen="error-api" frozen="{{ true }}" hint-size="1440px,900px"></dc-import></div>
+    </div>
+  </div>
+</section>
+</x-dc>
+</body>
+</html>

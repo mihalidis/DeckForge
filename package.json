@@ -1,0 +1,36 @@
+{
+  "name": "deckforge",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "sync:cards": "tsx --env-file=.env.local scripts/sync-cards.ts",
+    "eval": "tsx --env-file=.env.local scripts/eval.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^4.0.92",
+    "ai": "^7.0.133",
+    "deckstrings": "^3.1.2",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.0",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.3"
+  }
+}
