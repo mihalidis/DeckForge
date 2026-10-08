@@ -30,8 +30,9 @@ export interface Lookups {
 }
 
 export function buildLookups(meta: Metadata): Lookups {
+  // Blizzard bazı slug'ları satır sonuyla gönderiyor ("battlecry\n"); temizle.
   const mapOf = <T extends { id: number; slug: string }>(arr: T[]) =>
-    new Map(arr.map((x) => [x.id, x.slug] as const));
+    new Map(arr.map((x) => [x.id, x.slug.trim()] as const));
   return {
     classById: mapOf(meta.classes),
     typeById: mapOf(meta.types),

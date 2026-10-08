@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "sync:cards": "tsx --env-file=.env.local scripts/sync-cards.ts",
-    "eval": "tsx --env-file=.env.local scripts/eval.ts"
+    "eval": "tsx --env-file=.env.local scripts/eval.ts",
+    "llm:check": "tsx --env-file=.env.local scripts/llm-check.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.92",

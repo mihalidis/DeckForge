@@ -23,6 +23,10 @@ Faz 3'te bu dosya `tailwind.config.ts` → `theme.extend` ve `app/globals.css` �
 | `danger` | `#E46056` | Hata, diff'te çıkan kart |
 | `success` | `#4FBF7F` | Kopyalandı toast'ı, diff'te giren kart |
 | `info` | `#5B8DEF` | Bilgi rozeti |
+| `mana` / `mana-deep` | `#5B8DEF` / `#2F4FB0` | Mana kristali gradient'i, mana eğrisi çubukları |
+| `dust` | `#C7B9E6` | Dust elması |
+| `archetype` | `#AEB7F0` | Arketip rozeti metni (zemin: class-shaman %18) |
+| `toast` | `#1E2A2A` | "Copied" toast zemini |
 
 Saydam katmanlar (border ve yüzeyler), hepsi `fg` üzerinden:
 `rgba(242,233,216,.03)` zemin dokusu · `.08` ince ayraç · `.10` / `.12` kart kenarlığı · `.15` hover kenarlığı · `.20` aktif kenarlık.

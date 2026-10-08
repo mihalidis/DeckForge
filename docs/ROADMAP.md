@@ -18,7 +18,7 @@ Kapsam kararı (Faz 1–5): **yalnızca Standard, kullanıcı hesabı yok, dark 
 - [x] Sonuç sayfası yönü: **A (sticky sidebar)** seçildi
 - [x] Next.js 16 iskeleti (`--ts --tailwind --app --src-dir`), token'lar `globals.css` `@theme` bloğuna, fontlar `next/font` ile, `src/lib/*` klasörleri, `src/i18n/en.ts`
 - [ ] `npm install` (terminalden; bağımlılıklar package.json'da hazır) ve `npm run dev` ile ilk açılış
-- [ ] shadcn/ui kur (`npx shadcn@latest init`, Tailwind v4 + koyu tema) — Faz 3 başında da olabilir
+- [x] ~~shadcn/ui~~ — karar: kullanılmayacak; tasarım token'ları ve bileşenler elle yazılır (bağımlılık azalır, prototiple birebir)
 - [x] `.env.example` → `.env.local`; `README.md` çalıştırma adımları
 - [ ] Git init, ilk commit
 
@@ -40,32 +40,39 @@ Kapsam kararı (Faz 1–5): **yalnızca Standard, kullanıcı hesabı yok, dark 
 
 ## Faz 2 — Deste motoru (5–7 gün) — projenin kalbi
 
-- [ ] `src/lib/deck/rules.ts` — deste kuralları sabitleri (30 kart, kopya limitleri, DK rune, sideboard sahipleri)
-- [ ] `src/lib/deck/validate.ts` — deterministik doğrulayıcı; hataları `{code, cardId?, message}` listesi olarak döner
-- [ ] `src/lib/deck/deckstring.ts` — `deckstrings` ile encode/decode + `### Ad / # Class / # Format` panoya kopyalanacak metin üretimi
-- [ ] `src/lib/ai/provider.ts` — Vercel AI SDK sağlayıcı seçimi (`LLM_PROVIDER=google|ollama|anthropic`), model adları env'den
-- [ ] `src/lib/ai/intent.ts` — prompt → niyet JSON (`generateObject`, Zod şeması; Flash-Lite yeterli)
-- [ ] `src/lib/ai/retrieve.ts` — aday havuzu puanlama (sınıf, seed kart etiketleri, keyword/tribe/spell school, metin eşleşmesi) → 250–400 kart
-- [ ] `src/lib/ai/build.ts` — deste seçimi (`generateObject`, Gemini Flash), çıktı şeması: `cards[], name, archetype, gamePlan, mulligan[], swaps[]`
-- [ ] `src/lib/ai/repair.ts` — doğrulayıcı hatalarını LLM'e gönderip onarım; en fazla 2 tur; sonra kod tabanlı doldurma
-- [ ] `src/lib/deck/pipeline.ts` — intent → retrieve → build → validate → repair → encode → Blizzard `/deck?code=` doğrulaması; her adımı `onStep` ile raporlar
-- [ ] `app/api/forge/route.ts` — SSE/streaming yanıt: adım olayları + sonuç
-- [ ] `docs/ARCHETYPES.md` — sınıf başına 2–3 güncel arketip kısa rehberi (LLM sistem prompt'una girer)
-- [ ] Vitest: doğrulayıcı tüm kural ihlalleri, deckstring round-trip, pipeline mock ile uçtan uca
-- [ ] `scripts/eval.ts` — 30 prompt'luk değerlendirme seti; geçerlilik oranı + seed kart dahil mi + süre + token sayısı raporu (ücretsiz katman limitine takılmamak için istekler arası bekleme)
+- [x] `src/lib/deck/rules.ts` — kurallar, sınıf slug/adları, deckstring format sabitleri (sideboard: Standard'da şu an sideboard kartı yok, Faz 4+)
+- [x] `src/lib/deck/validate.ts` — SIZE / COPIES / UNKNOWN_CARD / CLASS_MISMATCH / RUNES / DUPLICATE_ENTRY / BAD_COUNT
+- [x] `src/lib/deck/deckstring.ts` — encode/decode, pano metni, kısa id
+- [x] `src/lib/ai/provider.ts` — sağlayıcı seçimi; `npm run llm:check` ile anahtar/model doğrulama
+- [x] `src/lib/ai/intent.ts` + `schemas.ts` + `prompts/intent.ts`
+- [x] `src/lib/ai/retrieve.ts` — havuzun tamamı (~380 kart, ~10k token) seed/sinerji/tribe puanıyla sıralı gider; noLegendaries ve mustExclude burada elenir
+- [x] `src/lib/ai/build.ts` + `prompts/build.ts` — `buildDeck`, `repairDeck`
+- [x] `src/lib/ai/repair.ts` — mekanik onarım (LLM 2 turda düzeltemezse)
+- [x] `src/lib/deck/pipeline.ts` — `forgeDeck()`; `ForgeError` türleri: vague / rotated / api / invalid / llm
+- [x] `app/api/forge/route.ts` — POST, SSE (`step` / `result` / `error`)
+- [x] `docs/ARCHETYPES.md` — arketip tanımları + sınıf kimlikleri (kart adı içermez)
+- [x] Vitest: validate (5), deckstring (3), retrieve (3), pipeline mock (4) — toplam 30 test yeşil
+- [x] `scripts/eval.ts` — 30 prompt (28 deste + 2 beklenen hata), 4 sn aralık, `data/eval-*.json` raporu
+- [x] `npm run llm:check` → anahtar ve model adları doğrulandı
+- [x] İlk gerçek desteler: 8/8 yasal + Blizzard doğrulamalı (Al'Akir Elemental, Budget Hunter, Armor Warrior, Murloc Paladin…), 15–35 sn
+- [ ] Tam 30'luk eval — ücretsiz Gemini kotası günde ~20 deste; **karar: ücretsiz kalınacak**, eval günlere bölünerek koşulur (`--limit`), `busy` görünce kendini durdurur
+- [ ] Üretilen 5 kodu oyunda elle test et (`data/eval-*.json` içindeki desteleri `/api/forge` ile tekrar üretmeye gerek yok; pano metni UI'dan kopyalanacak)
 
 **Bitti kriteri:** Eval setinde geçerli deste oranı %100 (doğrulayıcı sayesinde), seed kart dahil oranı ≥%95, ortalama süre <20 sn. Üretilen kodlar oyunda açılıyor (elle 5 deste test).
 
+**Durum (2026-10-08):** Motor çalışıyor; 8 gerçek destede yasal %100, seed %100, süre 15–35 sn (LLM'e bağlı). Kalan: oyun içi elle test ve eval'ın günlere yayılması. Faz 3'e geçildi.
+
 ## Faz 3 — Arayüz (4–6 gün)
 
-- [ ] Tasarımdan token'lar: `tailwind.config` renkler, fontlar, radius
-- [ ] Landing/prompt sayfası: prompt input, örnek chip'ler, sınıf seçici, format rozeti
-- [ ] Üretim durumu: adım izleyici (SSE olaylarını dinler)
-- [ ] Deste sonuç sayfası: başlık, deste kodu kopyala + toast, kart listesi (mana sıralı, rarity gem, ×1/×2), hover kart görseli, mana eğrisi grafiği, dust maliyeti
-- [ ] "Neden bu kartlar" paneli: game plan, mulligan, swap önerileri
-- [ ] Hata/boş durumlar: belirsiz prompt, API kapalı, Standard'da olmayan kart
-- [ ] Mobil düzen (390px), sticky kopyala butonu
-- [ ] Footer: Blizzard fan content sorumluluk reddi
+- [x] Token'lar `globals.css` `@theme` (Faz 0'da); mana/dust/archetype/toast renkleri eklendi
+- [x] Landing: `PromptBox` (textarea, format toggle, 11 sınıf chip'i, Forge), örnek chip'ler, `FeatureCards`
+- [x] `StepTracker` + `useForge` SSE istemcisi (adım/sonuç/hata olayları, süre sayacı, iptal)
+- [x] Sonuç (yön A): `DeckHeader` (sınıf rozeti, düzenlenebilir ad, dust/kart/avg, kopyala + toast, kod detayı, `ManaCurve`, aksiyonlar), `CardList` (mana grupları, `ManaGem`, rarity gem, hover'da gerçek kart görseli, kart-art grid)
+- [x] `WhyPanel` accordion (game plan, synergy, mulligan, swaps — Swap butonu Faz 4)
+- [x] `ErrorCard`: vague (örnek chip'leri), rotated, api, busy, llm, invalid
+- [x] Mobil: tek sütun, `StickyCopyBar`; hover önizleme yalnız masaüstü
+- [ ] Tarayıcıda gerçek deste ile gözden geçirme (masaüstü + 390px), tasarımla fark listesi
+- [x] `Navbar`, `Footer` (sorumluluk reddi)
 
 **Bitti kriteri:** Prompt → deste → kopyala → oyunda yapıştır akışı masaüstü ve mobilde çalışıyor; Lighthouse erişilebilirlik ≥90.
 

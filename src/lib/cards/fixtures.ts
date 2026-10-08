@@ -35,7 +35,7 @@ export const META: Metadata = {
   ],
   spellSchools: [{ id: 5, slug: "nature", name: "Nature" }],
   keywords: [
-    { id: 8, slug: "battlecry", name: "Battlecry" },
+    { id: 8, slug: "battlecry\n", name: "Battlecry" },
     { id: 1, slug: "taunt", name: "Taunt" },
   ],
 };

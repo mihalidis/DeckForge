@@ -26,6 +26,11 @@
   --color-danger: #e46056;
   --color-success: #4fbf7f;
   --color-info: #5b8def;
+  --color-mana: #5b8def;
+  --color-mana-deep: #2f4fb0;
+  --color-dust: #c7b9e6;
+  --color-archetype: #aeb7f0;
+  --color-toast: #1e2a2a;
 
   /* Sınıf renkleri */
   --color-class-mage: #69ccf0;

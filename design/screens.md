@@ -6,12 +6,12 @@ Prototip: `export/DeckForge.dc.html` (tarayıcıda aç, tıklanabilir). Tüm ekr
 |---|---|---|---|---|
 | 1a | Landing | `/` | `isLanding` | `Navbar`, `Hero`, `PromptBox` (textarea + örnek chip'ler `EXAMPLES` + `ClassChips` 11 sınıf + format rozeti "Standard" + "Forge deck" butonu), `FeatureCards` ×3, `Footer` |
 | 1b | Generating | `/` (aynı sayfa, prompt yukarı çöker) | `isGenerating` | `PromptSummary`, `StepTracker` (`STEPS`: 5 adım, `s.done` / `s.active`, sağda süre/sayaç `elapsed`), arcane shimmer |
-| 1c | Deck result — **A: sticky sidebar** | `/deck/[id]` | `isResult && isA` | Sol sabit: `DeckHeader` (sınıf ikonu `classInitial`, düzenlenebilir `deckName`, format, `dust`, `archetype`), `CopyCodeButton` + toast (`copied`), `DeckstringBlock` (katlanır, mono), `ManaCurve` (`curve`, 0–7+), `avgCost`, aksiyonlar (Regenerate `regenerate`, Tweak `focusRefine`, Share). Sağ: `CardList` / `CardGrid` toggle (`isList`/`isGrid`), `WhyTheseCards` accordion (`sections`, `sec.open`), `SwapRow` ×n |
+| 1c | Deck result — **A: sticky sidebar** | `/` (aynı sayfa; `/d/[code]` paylaşım route'u Faz 4) | `isResult && isA` | Sol sabit: `DeckHeader` (sınıf ikonu `classInitial`, düzenlenebilir `deckName`, format, `dust`, `archetype`), `CopyCodeButton` + toast (`copied`), `DeckstringBlock` (katlanır, mono), `ManaCurve` (`curve`, 0–7+), `avgCost`, aksiyonlar (Regenerate `regenerate`, Tweak `focusRefine`, Share). Sağ: `CardList` / `CardGrid` toggle (`isList`/`isGrid`), `WhyTheseCards` accordion (`sections`, `sec.open`), `SwapRow` ×n |
 | 1d | Deck result — **B: dashboard** | `/deck/[id]` | `isResult && isB` | Üst şerit `DeckHeaderBar` (kopyala sağ üstte), geniş `CardList`, sağ ray `WhyTheseCards` |
-| 1e | Refine thread | `/deck/[id]` altı | `thread.length > 0` | `RefineInput` (`refineText`, `sendRefine`), `ThreadEntry` (kullanıcı balonu `16/16/16/4`, AI yanıtı), `DiffList` (çıkan kırmızı `danger`, giren yeşil `success`, `dustDelta`) |
+| 1e | Refine thread | sonuç altı (Faz 4'te aktif) | `thread.length > 0` | `RefineInput` (`refineText`, `sendRefine`), `ThreadEntry` (kullanıcı balonu `16/16/16/4`, AI yanıtı), `DiffList` (çıkan kırmızı `danger`, giren yeşil `success`, `dustDelta`) |
 | 1f | Error: vague | `/` | `errVague` | `ErrorCard` + `vagueFixes` chip'leri ("Tell me a class or a card to build around") |
 | 1g | Error: rotated | `/` | `errRotated` | `ErrorCard` + "Standard'da yok" açıklaması + `useRotatedFix` (Wild önerisi / alternatif kart) |
-| 1h | Error: API | `/` | `errApi` | `ErrorCard` + `retryApi` butonu |
+| 1h | Error: API | `/` | `errApi` | `ErrorCard` + `retryApi` butonu. Aynı ekran `busy` (LLM kota/yoğunluk) için de kullanılır; metin farklı: "The forge is busy, try again in a minute" |
 
 **Karar (2026-10-08): A — sticky sidebar.** 1d (dashboard) uygulanmayacak; kopyala butonu ve mana eğrisi kaydırırken görünür kalır, mobilde tek sütun + sticky alt bar.
 

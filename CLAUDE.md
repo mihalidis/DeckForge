@@ -1,6 +1,6 @@
 # DeckForge
 
-Next.js 16 (App Router, Turbopack) + TypeScript + Tailwind v4 (CSS-first: token'lar `src/app/globals.css` `@theme` bloğunda, `tailwind.config` yok) + shadcn/ui. Kullanıcı serbest metinle deste ister, LLM (Vercel AI SDK; varsayılan Gemini Flash ücretsiz katman) kart havuzundan 30 kartlık **geçerli** bir Hearthstone destesi seçer, deck kodu üretilir ve oyuna yapıştırılır. Kart verisi Blizzard Hearthstone Game Data API'den gelir.
+Next.js 16 (App Router, Turbopack) + TypeScript + Tailwind v4 (CSS-first: token'lar `src/app/globals.css` `@theme` bloğunda, `tailwind.config` yok) (shadcn/ui yok; bileşenler `src/components/` altında elle yazılır). Kullanıcı serbest metinle deste ister, LLM (Vercel AI SDK; varsayılan Gemini Flash ücretsiz katman) kart havuzundan 30 kartlık **geçerli** bir Hearthstone destesi seçer, deck kodu üretilir ve oyuna yapıştırılır. Kart verisi Blizzard Hearthstone Game Data API'den gelir.
 
 Dokümanlar: `docs/FIZIBILITE.md` (neden/nasıl), `docs/ROADMAP.md` (faz planı, tek gerçek kaynak), `docs/API-NOTLARI.md` (Blizzard API + deckstring referansı), `docs/TASARIM-PROMPT.md`.
 
@@ -8,7 +8,8 @@ Dokümanlar: `docs/FIZIBILITE.md` (neden/nasıl), `docs/ROADMAP.md` (faz planı,
 
 - `npm run dev` — geliştirme sunucusu
 - `npm run sync:cards` — Blizzard'dan metadata + Standard kartları çekip `data/` altına yazar (Faz 1'den itibaren)
-- `npm run eval` — 30 prompt'luk deste değerlendirme seti (Faz 2'den itibaren)
+- `npm run eval` — 30 prompt'luk deste değerlendirme seti (`-- --limit 3`, `-- --no-verify`)
+- `npm run llm:check` — LLM anahtarı/model adı doğrulama
 - `npx tsc --noEmit` · `npx vitest` · `npx playwright test`
 
 ## Yapı
@@ -16,7 +17,7 @@ Dokümanlar: `docs/FIZIBILITE.md` (neden/nasıl), `docs/ROADMAP.md` (faz planı,
 - `src/lib/blizzard/` — token, tipli istemci, API tipleri. Blizzard'a **yalnızca** buradan çıkılır.
 - `src/lib/cards/` — yerel önbellek (`data/*.json`) üzerinden kart okuma/arama; LLM için `compact` satır formatı.
 - `src/lib/deck/` — kurallar, deterministik doğrulayıcı, deckstring encode/decode, pipeline.
-- `src/lib/ai/` — provider (sağlayıcı seçimi), intent (niyet), retrieve (aday havuzu), build (deste seçimi), repair (onarım). Prompt'lar `src/lib/ai/prompts/*.md`.
+- `src/lib/ai/` — provider (sağlayıcı seçimi), intent (niyet), retrieve (aday havuzu), build (deste seçimi), repair (onarım). Prompt'lar `src/lib/ai/prompts/*.ts` (sabit string), şemalar `schemas.ts` (Zod).
 - `app/api/forge` — SSE ile adım olayları + sonuç. `app/api/cards` — arama.
 - `data/` — senkron çıktısı, git'e girmez. `scripts/` — sync ve eval.
 - `design/` — Design prototipi (`export/DeckForge.dc.html`), `tokens.md`, `screens.md`. UI yazarken hedef budur.
@@ -36,6 +37,8 @@ Dokümanlar: `docs/FIZIBILITE.md` (neden/nasıl), `docs/ROADMAP.md` (faz planı,
 - **JSX'e hex yazılmaz.** Renkler `globals.css` `@theme` token'larından (`bg-ink-raised`, `text-accent`, `border-line` …) gelir; yeni renk gerekiyorsa önce `design/tokens.md`'ye, sonra `@theme`'e eklenir.
 - UI metinleri şimdilik İngilizce (Hearthstone terminolojisi); sabit metinler `src/i18n/en.ts`'te toplanır ki Faz 9'da TR eklenebilsin.
 - Kullanıcıya görünen her değişiklik `CHANGELOG.md` → `[Yayımlanmamış]` altına yazılır; tamamlanan maddeler `docs/ROADMAP.md`'de `[x]` yapılır.
+
+- `npm run eval` ücretsiz Gemini kotasını yer (günde ~20 deste); geliştirme sırasında `--limit 2-3` ile koş, kota dolunca `busy` döner.
 
 ## Skill'ler
 
