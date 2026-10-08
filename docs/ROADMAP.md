@@ -26,14 +26,15 @@ Kapsam kararı (Faz 1–5): **yalnızca Standard, kullanıcı hesabı yok, dark 
 
 ## Faz 1 — Veri katmanı (3–4 gün)
 
-- [ ] `src/lib/blizzard/auth.ts` — client-credentials token alma, bellek + dosya önbelleği, süre dolunca yenileme
-- [ ] `src/lib/blizzard/client.ts` — tipli `fetch` sarmalayıcı (`cards`, `card`, `deck`, `metadata`), hata ve rate-limit yönetimi
-- [ ] `src/lib/blizzard/types.ts` — API yanıt tipleri (`Card`, `Metadata`, `DeckResponse`)
-- [ ] `scripts/sync-cards.ts` — `/metadata` + Standard koleksiyon kartlarını çek, normalize et, `data/metadata.json` ve `data/cards.standard.json` yaz; `npm run sync:cards`
-- [ ] `src/lib/cards/repo.ts` — önbellekten okuma: `getCard(id)`, `searchCards(filter)`, `getStandardPool(classSlug)`
-- [ ] `src/lib/cards/compact.ts` — LLM için sıkıştırılmış kart satırı üretimi (`id|name|cost|atk/hp|type|rarity|text`)
-- [ ] `app/api/cards/route.ts` — arama ucu (UI'daki kart önizlemeleri için)
-- [ ] Vitest: token yenileme, sync normalize, compact formatı
+- [x] `src/lib/blizzard/auth.ts` — client-credentials token alma, bellek önbelleği, 5 dk marjla yenileme, eşzamanlı çağrı paylaşımı
+- [x] `src/lib/blizzard/client.ts` — tipli istemci (`metadata`, `card`, `searchCards`, `searchAllCards`, `deckByCode`, `deckByIds`), 401 yenileme, 429 bekleme
+- [x] `src/lib/blizzard/types.ts` — API yanıt tipleri
+- [x] `scripts/sync-cards.ts` + `src/lib/cards/normalize.ts` — metadata + Standard kartlar → `data/cards.standard.json` (+ `metadata.json`, `sample.raw.json`)
+- [x] İlk gerçek senkron: 1322 Standard kart, 8 set, 7 sn (2026-10-08). Dual-class kartlarda `classId=null` geldiği görüldü → normalize düzeltildi
+- [x] `src/lib/cards/repo.ts` — `getCard`, `searchCards`, `getStandardPool`, `getClassInfo`
+- [x] `src/lib/cards/compact.ts` — `dbfId|Name|cost|atk/hp|type|rarity|class|tags|text`
+- [x] `app/api/cards/route.ts` — arama ucu
+- [x] Vitest: auth (4), normalize (5), compact (2), repo (4) — `npm test` yerelde çalıştırılacak
 
 **Bitti kriteri:** `npm run sync:cards` 1 dakikada biter; `getStandardPool('shaman')` sınıf + nötr kartları döner; set listesi metadata'dan geliyor (elle yazılmış set yok).
 
