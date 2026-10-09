@@ -1,6 +1,6 @@
-// LLM'e gönderilen sıkıştırılmış kart satırı. Format sabittir; prompt'lar bu formata göre yazılır:
+// Compact card line sent to the LLM. The format is fixed; prompts are written against it:
 //   dbfId|Name|cost|atk/hp|type|rarity|class|tribes;keywords|text
-// Örnek: 61550|Shudderwock|9|6/6|minion|legendary|shaman|battlecry|Battlecry: Repeat all other Battlecries from cards you played this game (targets chosen randomly).
+// Example: 61550|Shudderwock|9|6/6|minion|legendary|shaman|battlecry|Battlecry: Repeat all other Battlecries from cards you played this game (targets chosen randomly).
 
 import type { CardRecord } from "./types";
 
@@ -31,7 +31,7 @@ export function toCompactBlock(cards: CardRecord[]): string {
   return cards.map(toCompactLine).join("\n");
 }
 
-/** Kabaca token tahmini (4 karakter ≈ 1 token). Eval raporu için. */
+/** Rough token estimate (4 chars ≈ 1 token). For the eval report. */
 export function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
 }

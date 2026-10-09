@@ -11,7 +11,7 @@ interface Props {
   onCancel: () => void;
 }
 
-/** Tasarım 1b: prompt özeti + arcane adım izleyici. */
+/** Design 1b: prompt summary + arcane step tracker. */
 export function StepTracker({ prompt, classColor, steps, elapsedMs, onCancel }: Props) {
   return (
     <section className="mx-auto mt-8 flex w-full max-w-[860px] flex-col gap-5">

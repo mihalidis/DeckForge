@@ -1,5 +1,5 @@
-// Yerel kart önbelleğinden okuma. Sunucu tarafı (fs). İlk çağrıda belleğe alınır.
-// Veri yoksa anlaşılır hata: `npm run sync:cards` çalıştırılmalı.
+// Reads from the local card cache. Server-side (fs). Loaded into memory on first call.
+// Clear error if data is missing: run `npm run sync:cards`.
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -17,14 +17,14 @@ export function loadDataset(): Promise<CardDataset> {
       .catch((err) => {
         datasetPromise = null;
         throw new Error(
-          `Kart verisi okunamadı (${CARDS_FILE}). Önce \`npm run sync:cards\` çalıştır. ${String(err)}`,
+          `Could not read card data (${CARDS_FILE}). Run \`npm run sync:cards\` first. ${String(err)}`,
         );
       });
   }
   return datasetPromise;
 }
 
-/** Testler / sync sonrası yeniden yükleme için. */
+/** For reloading in tests / after sync. */
 export function resetDataset() {
   datasetPromise = null;
 }
@@ -39,7 +39,7 @@ export async function getClassInfo(classSlug: string) {
   return ds.classes.find((c) => c.slug === classSlug);
 }
 
-/** Sınıf + nötr + bu sınıfı içeren dual-class kartlar (Standard, koleksiyon). */
+/** Class + neutral + dual-class cards that include this class (Standard, collectible). */
 export async function getStandardPool(classSlug: string): Promise<CardRecord[]> {
   const ds = await loadDataset();
   return ds.cards.filter(
@@ -51,9 +51,9 @@ export async function getStandardPool(classSlug: string): Promise<CardRecord[]> 
 }
 
 export interface SearchFilter {
-  q?: string; // isim/metin içinde arama (küçük/büyük harf duyarsız)
+  q?: string; // search in name/text (case-insensitive)
   classSlug?: string; // "shaman" → shaman + neutral + dual
-  cost?: number; // 10 = 10 ve üzeri
+  cost?: number; // 10 = 10 and above
   type?: string;
   rarity?: string;
   minionType?: string;

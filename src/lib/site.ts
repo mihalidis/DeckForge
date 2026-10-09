@@ -1,4 +1,4 @@
-/** Mutlak URL tabanı: NEXT_PUBLIC_SITE_URL (alan adı) → Vercel'in verdiği host → localhost. */
+/** Absolute URL base: NEXT_PUBLIC_SITE_URL (domain) → host provided by Vercel → localhost. */
 export function siteUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL;
   if (explicit) return explicit.replace(/\/$/, "");

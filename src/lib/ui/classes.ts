@@ -1,4 +1,4 @@
-// Sınıf → görsel eşlemeleri. Renkler globals.css @theme token'larından; JSX'e hex yazılmaz.
+// Class → visual mappings. Colors come from globals.css @theme tokens; no hex in JSX.
 import { CLASS_NAMES, CLASS_SLUGS, type ClassSlug } from "@/lib/deck/rules";
 
 export const CLASS_COLOR_VAR: Record<ClassSlug, string> = {
@@ -25,7 +25,7 @@ export const RARITY_COLOR_VAR: Record<string, string> = {
 
 export const CLASS_LIST = CLASS_SLUGS.map((slug) => ({ slug, name: CLASS_NAMES[slug], color: CLASS_COLOR_VAR[slug] }));
 
-/** Renk değişkenini verilen oranla saydamlaştırır (chip zemini, rozet). */
+/** Makes a color variable translucent by the given ratio (chip background, badge). */
 export const tint = (colorVar: string, pct: number) => `color-mix(in srgb, ${colorVar} ${pct}%, transparent)`;
 
 export const formatDust = (n: number) => n.toLocaleString("en-US");

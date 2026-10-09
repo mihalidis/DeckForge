@@ -1,10 +1,10 @@
 # design/
 
-Claude Design çıktısı buraya gelir; kod **buradan okunur, buraya yazılmaz**.
+Claude Design output goes here; code **reads from here, never writes here**.
 
-- `export/` — Design → Export → Code ile indirilen HTML/CSS/JS (zip açılmış hali). Referans; doğrudan `app/` içine kopyalanmaz, Next.js bileşenlerine çevrilir.
-- `screens/` — Her ekranın PNG'si (`01-landing.png`, `02-generating.png`, `03-deck-result.png`, `04-refine.png`, `05-errors.png`, `06-mobile-*.png`).
-- `tokens.md` — prototipten çıkarılan renk/font/radius/spacing token'ları (Faz 3'te `tailwind.config` kaynağı). `export/_ds/organic-*` Design'ın varsayılan iskeletidir, kullanılmaz.
-- `screens.md` — ekran → route → bileşen eşlemesi.
+- `export/` — HTML/CSS/JS downloaded via Design → Export → Code (unzipped). Reference only; it is not copied straight into `app/`, it is translated into Next.js components.
+- `screens/` — PNG of each screen (`01-landing.png`, `02-generating.png`, `03-deck-result.png`, `04-refine.png`, `05-errors.png`, `06-mobile-*.png`).
+- `tokens.md` — color/font/radius/spacing tokens extracted from the prototype (source for the `@theme` block in `src/app/globals.css`). `export/_ds/organic-*` is Design's default skeleton and is not used.
+- `screens.md` — screen → route → component mapping.
 
-Tasarım değişirse: export'u yeniden indir, `tokens.md`'yi güncelle, farkı `CHANGELOG.md`'ye yaz.
+If the design changes: re-download the export, update `tokens.md`, write the diff into `CHANGELOG.md`.

@@ -1,5 +1,5 @@
 // POST /api/deck  { classSlug, name, archetype?, cards:[{dbfId,count}] }  → DeckCore
-// LLM yok: kart listesini doğrular, kodlar. Swap ve kart düzenlemeleri için.
+// No LLM: validates and encodes the card list. For swaps and card edits.
 
 import { NextResponse } from "next/server";
 import { assembleDeck, AssembleError } from "@/lib/deck/assemble";

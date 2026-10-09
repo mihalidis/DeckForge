@@ -1,11 +1,11 @@
-// Blizzard ham kart + metadata → CardRecord. Senkron scripti ve testler kullanır.
+// Raw Blizzard card + metadata → CardRecord. Used by the sync script and tests.
 
 import type { ApiCard, Metadata } from "@/lib/blizzard/types";
 import type { CardRecord, Rarity } from "./types";
 
 export const NEUTRAL_CLASS_ID = 12;
 
-/** Blizzard metninden HTML etiketlerini ve fazla boşlukları temizler. */
+/** Strips HTML tags and extra whitespace from Blizzard text. */
 export function stripCardText(text: string | undefined): string {
   if (!text) return "";
   return text
@@ -30,7 +30,7 @@ export interface Lookups {
 }
 
 export function buildLookups(meta: Metadata): Lookups {
-  // Blizzard bazı slug'ları satır sonuyla gönderiyor ("battlecry\n"); temizle.
+  // Blizzard sends some slugs with a trailing newline ("battlecry\n"); clean them.
   const mapOf = <T extends { id: number; slug: string }>(arr: T[]) =>
     new Map(arr.map((x) => [x.id, x.slug.trim()] as const));
   return {
@@ -49,8 +49,8 @@ export function buildLookups(meta: Metadata): Lookups {
   };
 }
 
-/** Kartın sınıf slug'ları: birincil + ek sınıflar. Dual/multi-class kartlarda Blizzard classId=null gönderir,
- *  sınıflar yalnızca multiClassIds'te gelir; o durumda ilk sınıf birincil sayılır. */
+/** The card's class slugs: primary + extra classes. For dual/multi-class cards Blizzard sends classId=null
+ *  and the classes only come in multiClassIds; in that case the first class is treated as primary. */
 function classSlugsOf(c: ApiCard, L: Lookups): string[] {
   const out: string[] = [];
   const push = (id: number | null | undefined) => {
@@ -104,12 +104,12 @@ export function normalizeCard(c: ApiCard, L: Lookups): CardRecord {
   return rec;
 }
 
-/** Standard set grubunu metadata'dan okur; elle set listesi yazılmaz.
- *  Blizzard, duyurulmuş ama henüz çıkmamış genişlemeyi (`sets[].hyped === true`) Standard grubuna ve
- *  `set=standard` aramasına şimdiden dahil ediyor; oyun bu kartları içeren kodu reddeder. Varsayılan: hariç. */
+/** Reads the Standard set group from metadata; set lists are never hand-written.
+ *  Blizzard already includes an announced but unreleased expansion (`sets[].hyped === true`) in the Standard group and
+ *  the `set=standard` search; the game rejects codes containing those cards. Default: excluded. */
 export function standardSetSlugs(meta: Metadata, opts: { includeUpcoming?: boolean } = {}): string[] {
   const group = meta.setGroups.find((g) => g.slug === "standard");
-  if (!group) throw new Error("metadata.setGroups içinde 'standard' bulunamadı");
+  if (!group) throw new Error("'standard' not found in metadata.setGroups");
   if (opts.includeUpcoming) return group.cardSets;
   const upcoming = new Set(meta.sets.filter((s) => s.hyped).map((s) => s.slug));
   return group.cardSets.filter((slug) => !upcoming.has(slug));

@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     const body = (await req.json()) as { prompt?: string };
     prompt = (body.prompt ?? "").trim();
   } catch {
-    /* boş */
+    /* empty */
   }
   if (!prompt || prompt.length > 500) {
     return new Response(JSON.stringify({ kind: "vague", message: "Tell me what you want to play (max 500 characters)." }), {

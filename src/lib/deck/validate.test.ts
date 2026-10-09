@@ -17,9 +17,9 @@ const POOL: Record<number, CardRecord> = {
 const lookup = (id: number) => POOL[id];
 
 describe("validateDeck", () => {
-  it("geçerli 30 kartlık desteyi kabul eder", () => {
+  it("accepts a valid 30-card deck", () => {
     const cards = [{ dbfId: 1, count: 2 }, { dbfId: 2, count: 2 }, { dbfId: 3, count: 1 }, { dbfId: 4, count: 2 }, { dbfId: 6, count: 2 }];
-    // 9 kart; dolgu için havuza 21 kart ekle
+    // 9 cards; add 21 cards to the pool as filler
     const pool = { ...POOL };
     for (let i = 100; i < 121; i++) pool[i] = mk(i);
     const spec = { classSlug: "shaman", format: "standard" as const, cards: [...cards, ...Object.keys(pool).filter((k) => +k >= 100).map((k) => ({ dbfId: +k, count: 1 }))] };
@@ -29,7 +29,7 @@ describe("validateDeck", () => {
     expect(r.ok).toBe(true);
   });
 
-  it("boyut, kopya, sınıf ve bilinmeyen kart hatalarını raporlar", () => {
+  it("reports size, copy, class and unknown-card errors", () => {
     const r = validateDeck(
       { classSlug: "shaman", format: "standard", cards: [{ dbfId: 1, count: 3 }, { dbfId: 3, count: 2 }, { dbfId: 5, count: 1 }, { dbfId: 999, count: 1 }] },
       lookup,
@@ -39,17 +39,17 @@ describe("validateDeck", () => {
     expect(r.errors.find((e) => e.code === "CLASS_MISMATCH")?.dbfId).toBe(5);
   });
 
-  it("dual-class ve nötr kartları kabul eder", () => {
+  it("accepts dual-class and neutral cards", () => {
     const r = validateDeck({ classSlug: "shaman", format: "standard", cards: [{ dbfId: 4, count: 2 }, { dbfId: 6, count: 2 }] }, lookup);
     expect(r.errors.map((e) => e.code)).toEqual(["SIZE"]);
   });
 
-  it("aynı kartın iki girdisini yakalar", () => {
+  it("catches two entries of the same card", () => {
     const r = validateDeck({ classSlug: "shaman", format: "standard", cards: [{ dbfId: 1, count: 1 }, { dbfId: 1, count: 1 }] }, lookup);
     expect(r.errors.some((e) => e.code === "DUPLICATE_ENTRY")).toBe(true);
   });
 
-  it("Death Knight rune sınırını uygular", () => {
+  it("enforces the Death Knight rune limit", () => {
     const r = validateDeck({ classSlug: "deathknight", format: "standard", cards: [{ dbfId: 7, count: 1 }, { dbfId: 8, count: 1 }] }, lookup);
     expect(r.errors.some((e) => e.code === "RUNES")).toBe(true); // 2B + 2F = 4 > 3
     const ok = validateDeck({ classSlug: "deathknight", format: "standard", cards: [{ dbfId: 7, count: 2 }] }, lookup);

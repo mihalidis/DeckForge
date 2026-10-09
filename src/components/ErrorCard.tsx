@@ -10,7 +10,7 @@ interface Props {
   onUseExample: (text: string) => void;
 }
 
-/** Tasarım 1f/1g/1h: vague (amber, ?), rotated (amber, !), api/busy/llm/invalid (kırmızı, ×). */
+/** Design 1f/1g/1h: vague (amber, ?), rotated (amber, !), api/busy/llm/invalid (red, ×). */
 export function ErrorCard({ kind, message, onRetry, onUseExample }: Props) {
   const danger = kind === "api" || kind === "busy" || kind === "llm" || kind === "invalid";
   const glyph = kind === "vague" ? "?" : kind === "rotated" ? "!" : "×";

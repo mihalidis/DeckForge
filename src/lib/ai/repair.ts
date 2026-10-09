@@ -1,5 +1,5 @@
-// Kod tabanlı son çare onarımı: LLM iki turda da düzeltemezse deste burada mekanik olarak düzeltilir.
-// Geçersiz kartlar atılır, fazlalık kırpılır, eksik en yüksek puanlı adaylarla doldurulur.
+// Code-based last-resort repair: if the LLM can't fix the deck in two rounds, it is fixed mechanically here.
+// Invalid cards are dropped, excess is trimmed, shortfall is filled with the highest-scoring candidates.
 
 import type { CardRecord } from "@/lib/cards/types";
 import { DECK_SIZE } from "@/lib/deck/rules";
@@ -13,7 +13,7 @@ export function mechanicalRepair(
   candidates: RetrievedCard[],
   seeds: CardRecord[],
 ): DeckSpec {
-  // 1) birleştir + geçersizleri at
+  // 1) merge + drop invalid ones
   const merged = new Map<number, number>();
   for (const e of spec.cards) {
     const card = lookup(e.dbfId);
@@ -21,10 +21,10 @@ export function mechanicalRepair(
     const max = card.rarity === "legendary" ? 1 : 2;
     merged.set(e.dbfId, Math.min(max, (merged.get(e.dbfId) ?? 0) + Math.max(1, Math.floor(e.count))));
   }
-  // 2) seed'ler garanti
+  // 2) seeds are guaranteed
   for (const s of seeds) if (!merged.has(s.dbfId)) merged.set(s.dbfId, 1);
 
-  // 3) rune ihlali varsa en düşük puanlı rune kartlarını at
+  // 3) on rune violation, drop the lowest-scoring rune cards
   const scoreOf = new Map(candidates.map((c) => [c.card.dbfId, c.score]));
   const seedIds = new Set(seeds.map((s) => s.dbfId));
   const toSpec = (): DeckSpec => ({ ...spec, cards: Array.from(merged, ([dbfId, count]) => ({ dbfId, count })) });
@@ -38,7 +38,7 @@ export function mechanicalRepair(
     merged.delete(runeCards[0].dbfId);
   }
 
-  // 4) boyut: fazlaysa en düşük puanlıdan kırp, eksikse en yüksek puanlıdan doldur
+  // 4) size: trim from the lowest-scoring if over, fill from the highest-scoring if under
   const total = () => Array.from(merged.values()).reduce((a, b) => a + b, 0);
   const ordered = [...candidates].sort((a, b) => b.score - a.score);
   while (total() > DECK_SIZE) {

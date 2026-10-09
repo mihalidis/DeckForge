@@ -1,5 +1,5 @@
 // intent → retrieve → build → validate (→ repair ×2 → mechanical) → encode (→ Blizzard verify)
-// Her adım onStep ile raporlanır; UI'daki adım izleyici bu olayları dinler.
+// Each step is reported via onStep; the step tracker in the UI listens to these events.
 
 import { blizzard } from "@/lib/blizzard/client";
 import { getStandardPool, loadDataset } from "@/lib/cards/repo";
@@ -33,7 +33,7 @@ export class ForgeError extends Error {
   }
 }
 
-/** LLM hatasını kullanıcıya gösterilecek türe çevirir: kota/yoğunluk → busy, diğerleri → llm. */
+/** Maps an LLM error to a user-facing kind: quota/overload → busy, everything else → llm. */
 function llmError(stage: string, err: unknown): ForgeError {
   const msg = (err as Error).message ?? String(err);
   if (isQuotaError(err) || isTransientLlmError(err)) {
@@ -44,8 +44,8 @@ function llmError(stage: string, err: unknown): ForgeError {
 
 export interface ForgeOptions {
   onStep?: (e: StepEvent) => void;
-  maxRepairRounds?: number; // varsayılan 2
-  verifyWithBlizzard?: boolean; // varsayılan true
+  maxRepairRounds?: number; // default 2
+  verifyWithBlizzard?: boolean; // default true
 }
 
 function inferClass(intent: Intent, seedsInAnyClass: CardRecord[]): ClassSlug | null {
@@ -72,7 +72,7 @@ export async function forgeDeck(userPrompt: string, opts: ForgeOptions = {}): Pr
   }
   const ds = await loadDataset();
 
-  // seed kartları tüm havuzda ara (sınıf çıkarımı için)
+  // look up seed cards in the whole pool (for class inference)
   const seedsAny = intent.seedCards.map((n) => findCardByName(n, ds.cards)).filter((c): c is CardRecord => !!c);
   const missingSeeds = intent.seedCards.filter((n) => !findCardByName(n, ds.cards));
   if (missingSeeds.length && !seedsAny.length) {
@@ -144,7 +144,7 @@ export async function forgeDeck(userPrompt: string, opts: ForgeOptions = {}): Pr
       const localIds = cards.flatMap((c) => Array(c.count).fill(c.dbfId) as number[]).sort((a, b) => a - b);
       verified = remote.cardCount === 30 && JSON.stringify(remoteIds) === JSON.stringify(localIds);
     } catch {
-      verified = false; // Blizzard erişilemezse yerel doğrulama yeterli; UI'da not düşülür
+      verified = false; // if Blizzard is unreachable, local validation is enough; the UI shows a note
     }
   }
   emit({ step: "encode", status: "done", detail: verified ? "verified by Blizzard" : "encoded" });

@@ -1,5 +1,5 @@
-// Bellek içi, IP başına kayan pencere limiti. Tek sunucu için yeterli (Vercel'de her instance kendi sayar);
-// Faz 5'te gerekirse Upstash'e taşınır. Ücretsiz LLM kotasını tek kullanıcının tüketmesini engeller.
+// In-memory sliding-window limit per IP. Enough for a single server (on Vercel each instance counts on its own);
+// moves to Upstash in Phase 5 if needed. Keeps a single user from burning the free LLM quota.
 
 const buckets = new Map<string, number[]>();
 
@@ -13,7 +13,7 @@ export function rateLimit(key: string, limit: number, windowMs: number): { ok: b
   }
   arr.push(now);
   buckets.set(key, arr);
-  if (buckets.size > 10_000) buckets.clear(); // basit bellek koruması
+  if (buckets.size > 10_000) buckets.clear(); // simple memory guard
   return { ok: true, retryAfterSec: 0 };
 }
 

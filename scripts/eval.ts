@@ -1,5 +1,5 @@
-// 30 prompt'luk değerlendirme seti. Çalıştırma: npm run eval  [-- --limit 5] [-- --no-verify]
-// Rapor: geçerlilik, seed dahil mi, süre, onarım turu sayısı. data/eval-<tarih>.json'a yazar.
+// 30-prompt evaluation set. Run: npm run eval  [-- --limit 5] [-- --no-verify]
+// Report: legality, seed included, duration, number of repair rounds. Writes to data/eval-<date>.json.
 
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -38,7 +38,7 @@ const PROMPTS: { prompt: string; expectSeed?: string; expectClass?: string; expe
   { prompt: "Handbuff Paladin", expectClass: "paladin" },
   { prompt: "Overload Shaman", expectClass: "shaman" },
   { prompt: "aggro", expectError: "vague" },
-  { prompt: "Shudderwock Shaman for Standard", expectError: "rotated" }, // Shudderwock Wild'da
+  { prompt: "Shudderwock Shaman for Standard", expectError: "rotated" }, // Shudderwock is Wild
 ];
 
 async function main() {
@@ -46,13 +46,13 @@ async function main() {
   const limitArg = args.indexOf("--limit");
   const limit = limitArg >= 0 ? Number(args[limitArg + 1]) : PROMPTS.length;
   const verify = !args.includes("--no-verify");
-  const delayMs = 4000; // ücretsiz katman RPM limiti için
+  const delayMs = 4000; // for the free tier RPM limit
 
   const rows: Record<string, unknown>[] = [];
   let busyStreak = 0;
   for (const [i, p] of PROMPTS.slice(0, limit).entries()) {
     if (busyStreak >= 3) {
-      console.log(`\n! Üst üste 3 "busy" (kota/yoğunluk) — koşu durduruldu; kalan ${PROMPTS.slice(0, limit).length - i} prompt atlandı.`);
+      console.log(`\n! 3 "busy" in a row (quota/overload) — run stopped; skipped the remaining ${PROMPTS.slice(0, limit).length - i} prompts.`);
       break;
     }
     const t0 = Date.now();
@@ -99,7 +99,7 @@ async function main() {
   await mkdir(path.join(process.cwd(), "data"), { recursive: true });
   const file = path.join(process.cwd(), "data", `eval-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.json`);
   await writeFile(file, JSON.stringify(rows, null, 2));
-  console.log(`rapor: ${path.relative(process.cwd(), file)}`);
+  console.log(`report: ${path.relative(process.cwd(), file)}`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

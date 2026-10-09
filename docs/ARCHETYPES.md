@@ -1,28 +1,28 @@
-# Arketip rehberi (LLM sistem prompt'una özet olarak girer)
+# Archetype guide (included in the LLM system prompt as a summary)
 
-Meta/winrate verisi resmi API'de yok; bu dosya **sınıf kimliği + arketip tanımı** verir, güncel kart adları vermez (kartlar her sette değişir, LLM onları aday listesinden okur). Yeni genişlemede bu dosya değişmez; sınıf kimliği değişirse (yeni mekanik) tek satır eklenir.
+Meta/winrate data is not in the official API; this file provides **class identity + archetype definitions**, not current card names (cards change every set; the LLM reads them from the candidate list). This file does not change with a new expansion; if a class identity changes (new mechanic), a single line is added.
 
-## Arketipler
+## Archetypes
 
-- **Aggro** — 1–3 maliyetli 12+ kart, 5+ maliyette en fazla 2–3 kart. Hedef: 6–8. turda bitirmek. Removal az, burn/face hasarı ve board buff çok. Mulligan: 1–2 drop'lar.
-- **Midrange** — 1–6 düzgün eğri, board kontrolünü alıp tempoyla kazanır. Hem erken minyon hem birkaç güçlü mid-game kart.
-- **Control** — Removal, board clear, heal/armor, kart çekme; 2–4 geç oyun finisher. 7+ maliyet 3–5 kart olabilir. Mulligan: erken removal.
-- **Combo / OTK** — Belirli kart kombinasyonuyla kazanır; deste kart çekme + hayatta kalma + combo parçaları. Seed kart genelde combonun merkezidir.
+- **Aggro** — 12+ cards costing 1–3, at most 2–3 cards costing 5+. Goal: finish by turn 6–8. Little removal, lots of burn/face damage and board buffs. Mulligan: 1–2 drops.
+- **Midrange** — Smooth 1–6 curve, takes board control and wins with tempo. Both early minions and a few strong mid-game cards.
+- **Control** — Removal, board clears, heal/armor, card draw; 2–4 late-game finishers. Can have 3–5 cards costing 7+. Mulligan: early removal.
+- **Combo / OTK** — Wins with a specific card combination; the deck is card draw + survival + combo pieces. The seed card is usually the center of the combo.
 
-## Sınıf kimlikleri
+## Class identities
 
-| Sınıf | Güçlü yönler | Tipik tribe / mekanik |
+| Class | Strengths | Typical tribe / mechanic |
 |---|---|---|
-| Death Knight | Corpse ekonomisi, rune'a göre kimlik: Blood (heal/removal/control), Frost (burn/spell/freeze), Unholy (undead board/aggro) | Undead; en fazla 3 rune |
-| Demon Hunter | Hızlı tempo, kahraman saldırısı, Outcast, ucuz büyüler | Demon, Naga |
-| Druid | Mana ramp, Choose One, büyük minyonlar, token/board | Beast, Dragon, Treant |
-| Hunter | Face hasarı, Beast sinerjisi, Secret, silah | Beast |
-| Mage | Büyü hasarı, Freeze, Secret, Elemental, Discover | Elemental, spell school |
-| Paladin | Buff (handbuff/board), Divine Shield, silah, Murloc/Mech | Murloc, Mech, Dragon |
-| Priest | Heal, kopyalama/çalma, Dragon, Undead, control | Dragon, Undead, Naga |
-| Rogue | Combo, silah, Pirate, Stealth, ucuz kartlar, Miracle | Pirate, Mech |
-| Shaman | Overload, Elemental, Totem, Battlecry (Shudderwock), Nature büyüleri | Elemental, Totem, Murloc |
-| Warlock | Kart çekme (Life Tap), Demon, Discard, Zoo, kendine hasar | Demon, Imp |
-| Warrior | Armor, silah, Taunt, Rush, Pirate, Enrage | Pirate, Mech, Dragon |
+| Death Knight | Corpse economy, identity by rune: Blood (heal/removal/control), Frost (burn/spell/freeze), Unholy (undead board/aggro) | Undead; at most 3 runes |
+| Demon Hunter | Fast tempo, hero attacks, Outcast, cheap spells | Demon, Naga |
+| Druid | Mana ramp, Choose One, big minions, token/board | Beast, Dragon, Treant |
+| Hunter | Face damage, Beast synergy, Secret, weapons | Beast |
+| Mage | Spell damage, Freeze, Secret, Elemental, Discover | Elemental, spell school |
+| Paladin | Buffs (handbuff/board), Divine Shield, weapons, Murloc/Mech | Murloc, Mech, Dragon |
+| Priest | Heal, copy/steal, Dragon, Undead, control | Dragon, Undead, Naga |
+| Rogue | Combo, weapons, Pirate, Stealth, cheap cards, Miracle | Pirate, Mech |
+| Shaman | Overload, Elemental, Totem, Battlecry (Shudderwock), Nature spells | Elemental, Totem, Murloc |
+| Warlock | Card draw (Life Tap), Demon, Discard, Zoo, self-damage | Demon, Imp |
+| Warrior | Armor, weapons, Taunt, Rush, Pirate, Enrage | Pirate, Mech, Dragon |
 
-Pipeline bu tabloyu doğrudan kullanmıyor; `build.ts` sistem prompt'u arketip kurallarını kısa biçimde içeriyor. Tablo, prompt'u güncellerken ve eval sonuçlarını yorumlarken referans.
+The pipeline doesn't use this table directly; the `build.ts` system prompt contains the archetype rules in short form. The table is a reference when updating the prompt and interpreting eval results.

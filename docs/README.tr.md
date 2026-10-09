@@ -4,9 +4,9 @@
 
 Hearthstone için yapay zeka destekli deste üretici. Serbest metinle iste ("Shudderwock etrafında bir Shaman destesi"), geçerli 30 kartlık deste ve oyuna yapıştırılabilir deck kodu al.
 
-- Fizibilite: `docs/FIZIBILITE.md`
+- Fizibilite: `docs/FEASIBILITY.md`
 - Faz planı: `docs/ROADMAP.md`
-- API referansı: `docs/API-NOTLARI.md`
+- API referansı: `docs/API-NOTES.md`
 - Tasarım: `design/` (prototip `design/export/DeckForge.dc.html`, token'lar `design/tokens.md`)
 
 ## Kurulum

@@ -14,7 +14,7 @@ function groupByMana(cards: DeckCard[]) {
   return Array.from(map.entries()).sort((a, b) => a[0] - b[0]);
 }
 
-/* eslint-disable @next/next/no-img-element -- Blizzard CDN görselleri; next/image optimizasyonu gerekmiyor */
+/* eslint-disable @next/next/no-img-element -- Blizzard CDN images; next/image optimization not needed */
 export function CardList({ cards, classSlug, view, onView }: Props) {
   const [hover, setHover] = useState<number | null>(null);
   const classColor = CLASS_COLOR_VAR[classSlug as ClassSlug];

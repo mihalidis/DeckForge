@@ -21,28 +21,28 @@ const intent = (over: Partial<Intent> = {}): Intent => ({
 });
 
 describe("findCardByName", () => {
-  it("tam, başlangıç ve içerme eşleşmesi", () => {
+  it("exact, prefix and contains match", () => {
     expect(findCardByName("shudderwock", POOL)?.dbfId).toBe(1);
     expect(findCardByName("Murloc Tide", POOL)?.dbfId).toBe(2);
     expect(findCardByName("Seer", POOL)?.dbfId).toBe(3);
     expect(findCardByName("Ragnaros", POOL)).toBeUndefined();
-    // LLM'in uzattığı/eski isim: kelime öneki ile tek eşleşme
+    // Name lengthened/outdated by the LLM: single match via word prefix
     expect(findCardByName("Shudderwock the Battlecrier", POOL)?.dbfId).toBe(1);
-    expect(findCardByName("Murloc Something Else", [...POOL, { ...POOL[1], dbfId: 9, name: "Murloc Warleader" }])).toBeUndefined(); // "murloc" belirsiz
+    expect(findCardByName("Murloc Something Else", [...POOL, { ...POOL[1], dbfId: 9, name: "Murloc Warleader" }])).toBeUndefined(); // "murloc" is ambiguous
   });
 });
 
 describe("retrieveCandidates", () => {
-  it("seed'i en üste koyar ve sinerjili kartları öne alır", () => {
+  it("puts the seed on top and ranks synergy cards first", () => {
     const r = retrieveCandidates(intent({ seedCards: ["Shudderwock"] }), POOL);
     expect(r.seeds.map((s) => s.dbfId)).toEqual([1]);
     expect(r.candidates[0].card.dbfId).toBe(1);
-    // Coldlight Seer battlecry paylaşıyor → Tidecaller'dan önde
+    // Coldlight Seer shares battlecry → ahead of Tidecaller
     const order = r.candidates.map((c) => c.card.dbfId);
     expect(order.indexOf(3)).toBeLessThan(order.indexOf(2));
     expect(r.compact.split("\n")[0]).toMatch(/^1\|Shudderwock\|9\|/);
   });
-  it("noLegendaries ve mustExclude uygular, tribe odağını puanlar", () => {
+  it("applies noLegendaries and mustExclude, scores tribe focus", () => {
     const r = retrieveCandidates(intent({ mustExclude: ["Lightning Bolt"], constraints: { maxDust: null, noLegendaries: true, tribe: "murloc", keyword: null } }), POOL);
     const ids = r.candidates.map((c) => c.card.dbfId);
     expect(ids).not.toContain(4);

@@ -1,14 +1,14 @@
-// Normalize edilmiş kart kaydı: data/cards.standard.json içindeki şekil.
-// Tüm id → slug çevirileri senkron sırasında yapılır; uygulama kodu id'lerle uğraşmaz.
+// Normalized card record: the shape in data/cards.standard.json.
+// All id → slug conversions happen during sync; app code never deals with ids.
 
 export type Rarity = "free" | "common" | "rare" | "epic" | "legendary";
 export type CardType = "minion" | "spell" | "weapon" | "hero" | "location" | string;
 
 export interface CardRecord {
-  dbfId: number; // Blizzard `id`; deckstring bunu kullanır
+  dbfId: number; // Blizzard `id`; used by the deckstring
   slug: string;
   name: string;
-  text: string; // HTML etiketleri temizlenmiş
+  text: string; // HTML tags stripped
   cost: number;
   attack?: number;
   health?: number;
@@ -16,7 +16,7 @@ export interface CardRecord {
   armor?: number;
   type: CardType;
   classSlug: string; // "shaman" | "neutral" | ...
-  multiClass: string[]; // dual-class kartlar için ek sınıflar
+  multiClass: string[]; // extra classes for dual-class cards
   rarity: Rarity;
   set: string; // set slug
   minionTypes: string[];
@@ -25,7 +25,7 @@ export interface CardRecord {
   runeCost?: { blood: number; frost: number; unholy: number };
   touristClass?: string;
   maxSideboardCards?: number;
-  dust: number; // normal craft maliyeti
+  dust: number; // normal craft cost
   image: string;
   cropImage?: string;
 }
@@ -34,7 +34,7 @@ export interface ClassInfo {
   id: number;
   slug: string;
   name: string;
-  heroDbfId?: number; // deckstring heroes[] için
+  heroDbfId?: number; // for deckstring heroes[]
 }
 
 export interface SetInfo {

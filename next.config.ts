@@ -11,8 +11,8 @@ const nextConfig: NextConfig = {
       },
     },
   },
-  // Vercel/serverless: data/*.json derleme sırasında (prebuild → sync:cards) üretilir ve
-  // sunucu fonksiyonlarının paketine dahil edilir; çalışma zamanında fs'ten okunur.
+  // Vercel/serverless: data/*.json is generated at build time (prebuild → sync:cards) and
+  // bundled into the server functions; it is read from fs at runtime.
   outputFileTracingIncludes: {
     "/*": ["./data/*.json"],
   },

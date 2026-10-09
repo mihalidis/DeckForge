@@ -1,4 +1,4 @@
-/** Altıgen mana kristali (tasarımdaki clip-path). */
+/** Hexagonal mana crystal (clip-path from the design). */
 export function ManaGem({ cost, size = 28 }: { cost: number; size?: number }) {
   return (
     <span

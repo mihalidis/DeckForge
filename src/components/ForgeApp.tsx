@@ -61,7 +61,7 @@ export function ForgeApp() {
     if (!deck) return;
     setRefining(true); setRefineError(null);
     try {
-      // Legendary gelen kart 1 kopya olabilir; o zaman çıkanın yalnızca 1 kopyası çıkar ki toplam 30 kalsın.
+      // An incoming Legendary may be 1 copy; then only 1 copy of the outgoing card is removed so the total stays 30.
       const inCount = sw.in.rarity === "legendary" ? 1 : sw.out.count;
       const cards: { dbfId: number; count: number }[] = deck.cards
         .map((c) => ({ dbfId: c.dbfId, count: c.dbfId === sw.out.dbfId ? c.count - inCount : c.count }))
@@ -90,7 +90,7 @@ export function ForgeApp() {
     window.setTimeout(() => setShareLabel(undefined), 2000);
   };
 
-  // Sınıf chip'i prompt'a eklenir ki LLM niyeti kesin okusun; chip yoksa prompt olduğu gibi gider.
+  // The class chip is appended to the prompt so the LLM reads the intent unambiguously; without a chip the prompt is sent as is.
   const fullPrompt = () => (classSlug && !prompt.toLowerCase().includes(classSlug) ? `${prompt.trim()} (class: ${classSlug})` : prompt.trim());
   const run = () => { if (prompt.trim()) { setDeckName(""); setThread([]); setApplied(new Set()); setRefineError(null); void forge(fullPrompt()); } };
   const goHome = () => { reset(); window.scrollTo({ top: 0 }); };

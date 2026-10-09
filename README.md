@@ -2,7 +2,7 @@
 
 **AI deck builder for Hearthstone.** Describe the deck you want to play — *"Elemental Shaman around Al'Akir"*, *"cheap aggro Hunter under 3000 dust"* — and get a legal 30-card Standard deck with a code that pastes straight into the game.
 
-Live: https://deck-forge-eosin.vercel.app · Türkçe dokümantasyon: [`docs/`](docs/) ([README](docs/README.tr.md), [feasibility](docs/FIZIBILITE.md), [roadmap](docs/ROADMAP.md))
+Live: https://deck-forge-eosin.vercel.app · Docs: [`docs/`](docs/) ([feasibility](docs/FEASIBILITY.md), [roadmap](docs/ROADMAP.md)) · [Türkçe README](docs/README.tr.md)
 
 ## How it works
 
@@ -63,13 +63,13 @@ src/lib/deck       rules, validator, deckstring, assemble, pipeline
 src/lib/ai         provider selection, intent, retrieve, build, refine, repair
 src/app            pages, /api/forge (SSE), /api/refine, /api/deck, /d/[code]
 scripts            sync-cards, eval, llm-check, check-ids, prebuild
-docs               Turkish planning docs (feasibility, roadmap, API notes)
+docs               planning docs (feasibility, roadmap, API notes) + Turkish README
 design             Claude Design export, tokens and screen map
 ```
 
 ## Contributing
 
-Issues and PRs are welcome. The rules the code follows are in [`CLAUDE.md`](CLAUDE.md) (in Turkish; the gist: never hand-write set/class lists, never show an unvalidated deck, no hex colours in JSX, all LLM calls go through `src/lib/ai/provider.ts`).
+Issues and PRs are welcome. The rules the code follows are in [`CLAUDE.md`](CLAUDE.md) (the gist: never hand-write set/class lists, never show an unvalidated deck, no hex colours in JSX, all LLM calls go through `src/lib/ai/provider.ts`).
 
 ## License & disclaimer
 

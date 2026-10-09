@@ -1,5 +1,5 @@
-// /d/[code] — paylaşım linki. Kodu çözer, yerel kart verisiyle desteyi kurar; LLM ve DB yok.
-// Cache Components: sayfanın statik kabuğu Suspense sınırı; deste istek anında (fs) kurulur.
+// /d/[code] — share link. Decodes the code and builds the deck from local card data; no LLM, no DB.
+// Cache Components: the page's static shell is the Suspense boundary; the deck is built at request time (fs).
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps<"/d/[code]">): Prom
   if (!deck) return { title: "Deck not found", robots: { index: false } };
   return {
     title: deck.name,
-    robots: { index: false }, // paylaşım sayfaları sonsuz; arama motoru dizinine gerek yok
+    robots: { index: false }, // share pages are unbounded; no need for search engine indexing
     description: `${deck.className} · ${deck.cardCount} cards · ${deck.dust.toLocaleString("en-US")} dust. Copy the code and paste it into Hearthstone.`,
   };
 }

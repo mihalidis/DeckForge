@@ -1,6 +1,6 @@
 import { defineConfig } from "@playwright/test";
 
-// Smoke: landing açılıyor, paylaşım sayfası bilinen kodla deste gösteriyor. LLM'e gitmez (kota yemez).
+// Smoke: the landing page opens, the share page shows a deck for a known code. Does not call the LLM (uses no quota).
 export default defineConfig({
   testDir: "e2e",
   timeout: 30_000,

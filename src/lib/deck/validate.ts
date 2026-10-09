@@ -1,4 +1,4 @@
-// Deterministik deste doğrulayıcı. LLM çıktısı buradan geçmeden kullanıcıya gösterilmez.
+// Deterministic deck validator. LLM output is never shown to the user without passing through here.
 
 import type { CardRecord } from "@/lib/cards/types";
 import { DECK_SIZE, MAX_COPIES, MAX_LEGENDARY_COPIES, MAX_RUNES, NEUTRAL } from "./rules";
@@ -58,7 +58,7 @@ export function validateDeck(spec: DeckSpec, lookup: CardLookup): ValidationResu
   return { ok: errors.length === 0, errors, cardCount: total };
 }
 
-/** Hataları LLM onarım turuna göndermek için kısa metin. */
+/** Short text for sending errors to the LLM repair round. */
 export function formatErrors(errors: ValidationError[]): string {
   return errors.map((e) => `- [${e.code}] ${e.message}`).join("\n");
 }

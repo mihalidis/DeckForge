@@ -1,4 +1,4 @@
-// LLM anahtarı ve model adını doğrular: npm run llm:check
+// Verifies the LLM key and model name: npm run llm:check
 import { generateObject } from "ai";
 import { z } from "zod";
 import { getModelById, modelIdsFor, providerName, providerOptionsFor } from "../src/lib/ai/provider";
@@ -16,7 +16,7 @@ async function main() {
       console.log(`✓ ${providerName()} / ${role} = ${id} → ${JSON.stringify(object)} (${Date.now() - t0}ms)`);
     } catch (err) {
       console.log(`✗ ${providerName()} / ${role} = ${id} → ${(err as Error).message.slice(0, 300)}`);
-      console.log("  Model adı yanlışsa: https://ai.google.dev/gemini-api/docs/models adresinden güncel id'yi al, .env.local'de LLM_MODEL_* değiştir.");
+      console.log("  If the model name is wrong: get the current id from https://ai.google.dev/gemini-api/docs/models and change LLM_MODEL_* in .env.local.");
     }
   }
 }

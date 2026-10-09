@@ -1,6 +1,6 @@
-# Blizzard Hearthstone API & Deckstring — Hızlı Referans
+# Blizzard Hearthstone API & Deckstring — Quick Reference
 
-Geliştirme sırasında sık bakılacak notlar. Resmî doküman: https://develop.battle.net/documentation/hearthstone/game-data-apis
+Notes to consult frequently during development. Official documentation: https://develop.battle.net/documentation/hearthstone/game-data-apis
 
 ## Token
 
@@ -11,53 +11,53 @@ Content-Type: application/x-www-form-urlencoded
 
 grant_type=client_credentials
 ```
-Yanıt: `{ access_token, token_type: "bearer", expires_in: 86399 }`. Süre dolmadan ~5 dk önce yenile. Token sunucuda kalır.
+Response: `{ access_token, token_type: "bearer", expires_in: 86399 }`. Refresh ~5 min before expiry. The token stays on the server.
 
-## İstek şablonu
+## Request template
 
 ```
 GET https://eu.api.blizzard.com/hearthstone/{path}?locale=en_US&...
 Authorization: Bearer {access_token}
 ```
 
-## Uçlar
+## Endpoints
 
-| Uç | Not |
+| Endpoint | Note |
 |---|---|
-| `GET /cards` | Arama. Parametreler aşağıda. Yanıt: `{ cards[], cardCount, pageCount, page }` |
-| `GET /cards/{idOrSlug}` | Tek kart |
-| `GET /deck?code={deckstring}` | Kodu çözer; `{ deckCode, version, format, hero, heroPower, class, cards[], sideboardCards[], cardCount }` |
-| `GET /deck?ids=1,2,3&hero=7` | Kart id listesinden deste; `deckCode` üretir. Opsiyonel `sideboardCards=ownerId:cardId,...` |
-| `GET /metadata` | Hepsi birden |
+| `GET /cards` | Search. Parameters below. Response: `{ cards[], cardCount, pageCount, page }` |
+| `GET /cards/{idOrSlug}` | Single card |
+| `GET /deck?code={deckstring}` | Decodes the code; `{ deckCode, version, format, hero, heroPower, class, cards[], sideboardCards[], cardCount }` |
+| `GET /deck?ids=1,2,3&hero=7` | Deck from a list of card ids; produces `deckCode`. Optional `sideboardCards=ownerId:cardId,...` |
+| `GET /metadata` | Everything at once |
 | `GET /metadata/{type}` | `sets`, `setGroups`, `types`, `rarities`, `classes`, `minionTypes`, `spellSchools`, `keywords`, `bgGameModes` |
-| `GET /cardbacks` | Kart arkaları (kullanmıyoruz) |
+| `GET /cardbacks` | Card backs (not used) |
 
-## `/cards` parametreleri
+## `/cards` parameters
 
-| Parametre | Örnek | Not |
+| Parameter | Example | Note |
 |---|---|---|
-| `set` | `standard`, `wild`, `the-great-dark-beyond` | `standard`/`wild` kısayolları setGroup'a göre çalışır |
-| `class` | `shaman`, `shaman,neutral` | slug; virgülle çoklu |
-| `manaCost` | `3`, `0,1,2`, `10` | 10 = 10 ve üzeri |
+| `set` | `standard`, `wild`, `the-great-dark-beyond` | the `standard`/`wild` shortcuts work by setGroup |
+| `class` | `shaman`, `shaman,neutral` | slug; comma-separated for multiple |
+| `manaCost` | `3`, `0,1,2`, `10` | 10 = 10 and above |
 | `attack`, `health` | `4` | |
-| `collectible` | `1`, `0`, `0,1` | Standard için `1` |
+| `collectible` | `1`, `0`, `0,1` | `1` for Standard |
 | `rarity` | `legendary` | `common,free,rare,epic,legendary` |
 | `type` | `minion`, `spell`, `weapon`, `hero`, `location` | |
 | `minionType` | `murloc`, `dragon`, `elemental`, … | |
 | `spellSchool` | `fire`, `nature`, … | |
 | `keyword` | `battlecry`, `deathrattle`, `rush`, … | |
-| `textFilter` | `shudderwock` | isim + metin araması |
-| `gameMode` | `constructed` (varsayılan), `battlegrounds`, `mercenaries` | |
-| `page`, `pageSize` | `1`, `500` | pageSize büyük tutulup sayfalar gezilir |
+| `textFilter` | `shudderwock` | name + text search |
+| `gameMode` | `constructed` (default), `battlegrounds`, `mercenaries` | |
+| `page`, `pageSize` | `1`, `500` | keep pageSize large and iterate pages |
 | `sort` | `manaCost:asc`, `name:asc`, `attack:desc` | |
 
-Limit: 36.000 istek/saat, 100 istek/saniye.
+Limit: 36,000 requests/hour, 100 requests/second.
 
-## Kart yanıtı (önemli alanlar)
+## Card response (important fields)
 
 ```json
 {
-  "id": 61550,                 // dbfId — DECKSTRING BUNU KULLANIR
+  "id": 61550,                 // dbfId — THE DECKSTRING USES THIS
   "slug": "61550-shudderwock",
   "classId": 7, "multiClassIds": [],
   "cardTypeId": 4, "cardSetId": 1004, "rarityId": 5,
@@ -71,52 +71,52 @@ Limit: 36.000 istek/saat, 100 istek/saniye.
 }
 ```
 
-`classId`, `cardTypeId`, `cardSetId`, `rarityId`, `minionTypeId`, `keywordIds` → `/metadata` ile slug/isme çevrilir. `metadata.classes[].cardId` = o sınıfın temel kahraman dbfId'si (deckstring `heroes` için).
+`classId`, `cardTypeId`, `cardSetId`, `rarityId`, `minionTypeId`, `keywordIds` → resolved to slug/name via `/metadata`. `metadata.classes[].cardId` = that class's base hero dbfId (for deckstring `heroes`).
 
-## Deste kuralları (doğrulayıcı)
+## Deck rules (validator)
 
-- Tam 30 kart (Renathal 40 kart Wild'a özel; Standard'da yok).
-- Legendary en fazla 1 kopya, diğerleri 2.
-- Her kart: `classId == deste sınıfı` **veya** `classId == neutral(12)` **veya** `multiClassIds` içinde deste sınıfı var.
-- Her kartın `cardSetId`'si `setGroups` içinde `slug == "standard"` olanın `cardSets` listesinde **ve** seti `hyped: false` (çıkmış). Blizzard, duyurulan ama çıkmamış genişlemeyi `set=standard`'a şimdiden ekliyor; oyun bu kartlı deste kodunu sessizce reddediyor (2026-10-09'da yaşandı: Reign of the Black Empire).
+- Exactly 30 cards (Renathal's 40 cards is Wild-only; not in Standard).
+- Legendary at most 1 copy, others 2.
+- Each card: `classId == deck class` **or** `classId == neutral(12)` **or** the deck class is in `multiClassIds`.
+- Each card's `cardSetId` is in the `cardSets` list of the `setGroups` entry with `slug == "standard"` **and** its set is `hyped: false` (released). Blizzard already adds an announced but unreleased expansion to `set=standard`; the game silently rejects deck codes containing those cards (happened on 2026-10-09: Reign of the Black Empire).
 - `collectible == 1`.
-- Death Knight: toplam rune ≤ 3, kartların rune gereksinimi (`runeCost`) uyumlu.
-- Sideboard: E.T.C. (3 kart), Zilliax Deluxe 3000 (2 modül) — Faz 2'de yalnız doğrula, LLM'e üretme izni Faz 4+.
-- Hero/hero power kartları desteye girmez.
+- Death Knight: total runes ≤ 3, cards' rune requirements (`runeCost`) compatible.
+- Sideboard: E.T.C. (3 cards), Zilliax Deluxe 3000 (2 modules) — in Phase 2 only validate; the LLM is allowed to generate them in Phase 4+.
+- Hero/hero power cards don't go into the deck.
 
 ## Deckstring
 
 ```
-base64( 0x00, varint(1), varint(format), varint(len) heroes…, varint(len) 1x…, varint(len) 2x…, varint(len) (dbfId,count)…, [sideboard bloğu] )
+base64( 0x00, varint(1), varint(format), varint(len) heroes…, varint(len) 1x…, varint(len) 2x…, varint(len) (dbfId,count)…, [sideboard block] )
 ```
-`format`: 1 Wild · 2 Standard · 3 Classic · 4 Twist. Kartlar dbfId artan sıralı.
+`format`: 1 Wild · 2 Standard · 3 Classic · 4 Twist. Cards sorted ascending by dbfId.
 
 ```ts
 import { encode, decode } from "deckstrings";
 const code = encode({
   format: 2,
-  heroes: [1066],                      // Thrall — metadata.classes'tan oku, sabit yazma
+  heroes: [1066],                      // Thrall — read from metadata.classes, don't hard-code
   cards: [[61550, 1], [59725, 2]],     // [dbfId, count]
   sideboardCards: [],                  // [dbfId, count, ownerDbfId]
 });
 ```
 
-Panoya kopyalanacak metin:
+Text to copy to the clipboard:
 ```
-### {Deste Adı}
-# Class: {Sınıf}
+### {Deck Name}
+# Class: {Class}
 # Format: Standard
 # Year of the {…}
 #
-# 2x (1) Kart Adı
+# 2x (1) Card Name
 # 1x (9) Shudderwock
 #
 {deckstring}
 #
 # To use this deck, copy it to your clipboard and create a new deck in Hearthstone
 ```
-Oyun `#` satırlarını yok sayar, `###` satırını deste adı yapar.
+The game ignores `#` lines and uses the `###` line as the deck name.
 
-## Yedek: HearthstoneJSON
+## Fallback: HearthstoneJSON
 
-`https://api.hearthstonejson.com/v1/latest/enUS/cards.collectible.json` — `dbfId` alanı Blizzard `id` ile aynı. `mechanics[]` dizisi (TAUNT, BATTLECRY, …) retrieval'da ek sinyal olarak kullanılabilir. Render: `https://art.hearthstonejson.com/v1/render/latest/enUS/256x/{cardId}.png`.
+`https://api.hearthstonejson.com/v1/latest/enUS/cards.collectible.json` — the `dbfId` field is the same as Blizzard's `id`. The `mechanics[]` array (TAUNT, BATTLECRY, …) can be used as an extra signal in retrieval. Render: `https://art.hearthstonejson.com/v1/render/latest/enUS/256x/{cardId}.png`.

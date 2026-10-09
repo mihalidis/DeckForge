@@ -1,5 +1,5 @@
 // POST /api/refine  { classSlug, name, archetype?, cards:[{dbfId,count}], instruction, history? }
-// → { reply, deck: DeckCore, diff }   (LLM düzenler → validate/repair → encode)
+// → { reply, deck: DeckCore, diff }   (LLM edits → validate/repair → encode)
 
 import { NextResponse } from "next/server";
 import { toCompactBlock } from "@/lib/cards/compact";
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
     let spec: DeckSpec = { classSlug, format: "standard", cards: out.cards };
     if (!validateDeck(spec, lookup).ok) {
-      // LLM bozduysa mekanik onarım: mevcut desteyi koruyacak şekilde puanla
+      // If the LLM broke it, mechanical repair: score so as to preserve the current deck
       const candidates = pool.map((card) => ({ card, score: before.some((b) => b.dbfId === card.dbfId) ? 10 : 0, reasons: [] as string[] }));
       spec = mechanicalRepair(spec, lookup, candidates, []);
     }

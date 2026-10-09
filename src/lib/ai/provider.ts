@@ -1,4 +1,4 @@
-// LLM sağlayıcı seçimi. Tüm LLM çağrıları bu dosyadan model alır; sağlayıcı SDK'ları başka yerde import edilmez.
+// LLM provider selection. All LLM calls get their model from this file; provider SDKs are not imported anywhere else.
 // LLM_PROVIDER=google | ollama | anthropic   (.env.local)
 
 import type { LanguageModel } from "ai";
@@ -15,9 +15,9 @@ const DEFAULT_MODELS: Record<string, Record<Role, string>> = {
 
 export type ThinkingLevel = "minimal" | "low" | "medium" | "high";
 
-/** Sağlayıcıya özel seçenekler. Gemini 3.x'te düşünme seviyesi gecikmeyi doğrudan belirler:
- *  intent için "minimal" (basit JSON), build için "medium" (kalite; "low" ~2x hızlı, env ile seçilir).
- *  .env: LLM_THINKING_INTENT / LLM_THINKING_BUILD. 3.7/3.8 Flash "minimal" kabul etmez → "low"a yükseltilir. */
+/** Provider-specific options. On Gemini 3.x the thinking level directly drives latency:
+ *  "minimal" for intent (simple JSON), "medium" for build (quality; "low" is ~2x faster, chosen via env).
+ *  .env: LLM_THINKING_INTENT / LLM_THINKING_BUILD. 3.7/3.8 Flash doesn't accept "minimal" → raised to "low". */
 export function providerOptionsFor(role: Role, modelId: string): ProviderOptions | undefined {
   if (providerName() !== "google") return undefined;
   const env = (role === "intent" ? process.env.LLM_THINKING_INTENT : process.env.LLM_THINKING_BUILD) as ThinkingLevel | undefined;
@@ -30,7 +30,7 @@ export function providerName(): string {
   return process.env.LLM_PROVIDER ?? "google";
 }
 
-/** Virgülle ayrılmış model listesi: ilki tercih, sonrakiler yoğunluk/kota hatasında yedek. */
+/** Comma-separated model list: the first is preferred, the rest are fallbacks on overload/quota errors. */
 export function modelIdsFor(role: Role): string[] {
   const env = role === "intent" ? process.env.LLM_MODEL_INTENT : process.env.LLM_MODEL_BUILD;
   const raw = env || DEFAULT_MODELS[providerName()]?.[role] || DEFAULT_MODELS.google[role];
@@ -41,29 +41,29 @@ export function modelIdFor(role: Role): string {
   return modelIdsFor(role)[0];
 }
 
-/** Günlük/dakikalık kota doldu (429 RESOURCE_EXHAUSTED). Yedek modele geçmeye değer ama kullanıcıya "yoğunluk" olarak gösterilir. */
+/** Daily/per-minute quota exhausted (429 RESOURCE_EXHAUSTED). Worth falling back to another model, but shown to the user as "busy". */
 export function isQuotaError(err: unknown): boolean {
   const e = err as { statusCode?: number; message?: string };
   return e?.statusCode === 429 || /exceeded your current quota|resource.?exhausted|rate limit/i.test(String(e?.message ?? ""));
 }
 
-/** Geçici sağlayıcı hataları (yoğunluk, kota, 5xx) — bir sonraki modele geçmeye değer. */
+/** Transient provider errors (overload, quota, 5xx) — worth moving on to the next model. */
 export function isTransientLlmError(err: unknown): boolean {
   const e = err as { statusCode?: number; message?: string; cause?: unknown; name?: string };
-  if (e?.name === "AbortError" || e?.name === "TimeoutError") return true; // bizim zaman aşımımız
+  if (e?.name === "AbortError" || e?.name === "TimeoutError") return true; // our own timeout
   const status = e?.statusCode ?? (e?.cause as { statusCode?: number } | undefined)?.statusCode;
   if (status && [429, 500, 502, 503, 504].includes(status)) return true;
   const msg = String(e?.message ?? "").toLowerCase();
   return /high demand|overloaded|resource exhausted|rate limit|quota|unavailable|try again/.test(msg);
 }
 
-/** Çağrı başına zaman aşımı (ms). Yavaş/sıkışık model yerine yedeğe geçmek için. */
+/** Per-call timeout (ms). Lets us fall back instead of waiting on a slow/congested model. */
 export function timeoutFor(role: Role): number {
   const env = role === "intent" ? process.env.LLM_TIMEOUT_INTENT_MS : process.env.LLM_TIMEOUT_BUILD_MS;
   return Number(env) || (role === "intent" ? 15_000 : 60_000);
 }
 
-/** Rolün model listesini sırayla dener; geçici hatada sonrakine geçer, kalıcı hatada hemen fırlatır. */
+/** Tries the role's model list in order; moves on after a transient error, throws immediately on a permanent one. */
 export async function withModelFallback<T>(role: Role, fn: (model: LanguageModel, id: string) => Promise<T>): Promise<T> {
   const ids = modelIdsFor(role);
   let lastErr: unknown;
@@ -73,18 +73,18 @@ export async function withModelFallback<T>(role: Role, fn: (model: LanguageModel
     } catch (err) {
       lastErr = err;
       if (i === ids.length - 1 || !isTransientLlmError(err)) throw err;
-      console.warn(`[llm] ${id} geçici hata, ${ids[i + 1]} deneniyor: ${String((err as Error).message).slice(0, 120)}`);
+      console.warn(`[llm] ${id} transient error, trying ${ids[i + 1]}: ${String((err as Error).message).slice(0, 120)}`);
     }
   }
   throw lastErr;
 }
 
-/** Paket adını değişkenden import eder ki kurulu olmayan opsiyonel sağlayıcılar tsc'yi kırmasın. */
+/** Imports the package name from a variable so optional providers that aren't installed don't break tsc. */
 async function dynamicImport(pkg: string): Promise<Record<string, unknown>> {
   try {
     return (await import(/* webpackIgnore: true */ pkg)) as Record<string, unknown>;
   } catch {
-    throw new Error(`LLM_PROVIDER=${providerName()} için paket kurulu değil: npm i ${pkg}`);
+    throw new Error(`Package for LLM_PROVIDER=${providerName()} is not installed: npm i ${pkg}`);
   }
 }
 
@@ -97,7 +97,7 @@ export async function getModelById(id: string): Promise<LanguageModel> {
     case "google": {
       const { createGoogleGenerativeAI } = await import("@ai-sdk/google");
       const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-      if (!apiKey) throw new Error("GOOGLE_GENERATIVE_AI_API_KEY tanımlı değil (.env.local)");
+      if (!apiKey) throw new Error("GOOGLE_GENERATIVE_AI_API_KEY is not set (.env.local)");
       return createGoogleGenerativeAI({ apiKey })(id);
     }
     case "ollama": {
@@ -111,6 +111,6 @@ export async function getModelById(id: string): Promise<LanguageModel> {
       return create({ apiKey: process.env.ANTHROPIC_API_KEY })(id);
     }
     default:
-      throw new Error(`Bilinmeyen LLM_PROVIDER: ${providerName()}`);
+      throw new Error(`Unknown LLM_PROVIDER: ${providerName()}`);
   }
 }

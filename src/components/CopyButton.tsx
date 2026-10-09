@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { en } from "@/i18n/en";
 
-/** navigator.clipboard yoksa (http://192.168… gibi güvensiz bağlam) gizli textarea + execCommand ile kopyalar. */
+/** If navigator.clipboard is unavailable (insecure context like http://192.168…), copies via a hidden textarea + execCommand. */
 function legacyCopy(text: string): boolean {
   try {
     const ta = document.createElement("textarea");
@@ -26,7 +26,7 @@ export function useCopy(text: string) {
   useEffect(() => () => { if (t.current) window.clearTimeout(t.current); }, []);
   const copy = async () => {
     let ok = false;
-    try { await navigator.clipboard.writeText(text); ok = true; } catch { /* HTTPS dışı / izin yok → eski yöntem */ }
+    try { await navigator.clipboard.writeText(text); ok = true; } catch { /* non-HTTPS / no permission → legacy method */ }
     if (!ok) ok = legacyCopy(text);
     if (!ok) { window.prompt("Copy the deck code manually:", text); return; }
     setCopied(true);

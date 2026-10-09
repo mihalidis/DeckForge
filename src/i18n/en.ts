@@ -1,4 +1,4 @@
-// Tüm kullanıcıya görünen metinler burada toplanır (CLAUDE.md kuralı). Faz 9'da tr.ts eklenir.
+// All user-facing strings are collected here (CLAUDE.md rule). tr.ts will be added in Phase 9.
 export const en = {
   app: { name: "DeckForge", tagline: "AI deck builder for Hearthstone" },
   nav: { newDeck: "New deck", about: "About" },

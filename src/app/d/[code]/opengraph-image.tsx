@@ -1,4 +1,4 @@
-// /d/[code] için sosyal önizleme görseli (1200×630). Kart verisinden kurulur; font: sistem.
+// Social preview image for /d/[code] (1200×630). Built from card data; font: system.
 import { ImageResponse } from "next/og";
 import { connection } from "next/server";
 import { loadDataset } from "@/lib/cards/repo";
@@ -13,7 +13,7 @@ export const contentType = "image/png";
 const CLASS_HEX: Record<string, string> = {
   deathknight: "#3C9AB0", demonhunter: "#2FBF71", druid: "#A2673F", hunter: "#8BC34A", mage: "#69CCF0", paladin: "#F5C542",
   priest: "#D8D8E8", rogue: "#8A8A94", shaman: "#5B6DD6", warlock: "#9482C9", warrior: "#C9433F",
-}; // OG görseli CSS değişkenlerine erişemez; design/tokens.md ile aynı değerler
+}; // The OG image can't access CSS variables; same values as design/tokens.md
 
 export default async function Image({ params }: { params: Promise<{ code: string }> }) {
   await connection();
@@ -24,7 +24,7 @@ export default async function Image({ params }: { params: Promise<{ code: string
     const ds = await loadDataset();
     const cls = ds.classes.find((c) => c.heroDbfId === d.heroes[0]);
     if (cls && isClassSlug(cls.slug)) deck = await assembleDeck({ spec: { classSlug: cls.slug, format: "standard", cards: d.cards }, name: `${CLASS_NAMES[cls.slug]} deck` });
-  } catch { /* geçersiz kod → genel görsel */ }
+  } catch { /* invalid code → generic image */ }
 
   const bins = Array.from({ length: 8 }, () => 0);
   for (const c of deck?.cards ?? []) bins[Math.min(c.cost, 7)] += c.count;

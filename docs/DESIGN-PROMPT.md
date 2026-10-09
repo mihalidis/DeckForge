@@ -1,6 +1,6 @@
-# Design için tasarım promptu
+# Design prompt for Design
 
-Aşağıdaki promptu Claude Design'a (veya kullandığın tasarım aracına) olduğu gibi yapıştır. Prompt İngilizce yazıldı çünkü tasarım araçları İngilizce ile daha tutarlı sonuç veriyor; arayüz metinleri Hearthstone terminolojisiyle İngilizce, dil desteği (TR) sonraki fazda eklenecek.
+Paste the prompt below as-is into Claude Design (or whichever design tool you use). The prompt is written in English because design tools give more consistent results in English; UI text is in English using Hearthstone terminology, and language support (TR) will be added in a later phase.
 
 ---
 

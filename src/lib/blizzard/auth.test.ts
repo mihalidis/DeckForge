@@ -22,23 +22,23 @@ describe("getAccessToken", () => {
   });
   afterEach(() => vi.useRealTimers());
 
-  it("token'ı önbellekler ve tekrar istek atmaz", async () => {
+  it("caches the token and does not request again", async () => {
     const f = fakeFetch();
     expect(await getAccessToken({ fetchImpl: f.impl })).toBe("tok-1");
     expect(await getAccessToken({ fetchImpl: f.impl })).toBe("tok-1");
     expect(f.calls()).toBe(1);
   });
 
-  it("süre dolmadan 5 dk önce yeniler", async () => {
-    const f = fakeFetch(600); // 10 dk
+  it("refreshes 5 min before expiry", async () => {
+    const f = fakeFetch(600); // 10 min
     await getAccessToken({ fetchImpl: f.impl });
     vi.advanceTimersByTime(4 * 60 * 1000);
     expect(await getAccessToken({ fetchImpl: f.impl })).toBe("tok-1");
-    vi.advanceTimersByTime(2 * 60 * 1000); // kalan 4 dk < 5 dk marj
+    vi.advanceTimersByTime(2 * 60 * 1000); // 4 min left < 5 min margin
     expect(await getAccessToken({ fetchImpl: f.impl })).toBe("tok-2");
   });
 
-  it("eşzamanlı çağrılar tek isteği paylaşır", async () => {
+  it("concurrent calls share a single request", async () => {
     const f = fakeFetch();
     const [a, b, c] = await Promise.all([
       getAccessToken({ fetchImpl: f.impl }),
@@ -49,7 +49,7 @@ describe("getAccessToken", () => {
     expect(f.calls()).toBe(1);
   });
 
-  it("kimlik bilgisi yoksa anlaşılır hata verir", async () => {
+  it("throws a clear error when credentials are missing", async () => {
     delete process.env.BLIZZARD_CLIENT_ID;
     await expect(getAccessToken({ fetchImpl: fakeFetch().impl })).rejects.toThrow(/BLIZZARD_CLIENT_ID/);
   });

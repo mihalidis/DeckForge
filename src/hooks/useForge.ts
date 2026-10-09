@@ -1,5 +1,5 @@
 "use client";
-// /api/forge SSE istemcisi. Adım olaylarını ve sonucu state'e yazar.
+// /api/forge SSE client. Writes step events and the result to state.
 
 import { useCallback, useRef, useState } from "react";
 import type { StepEvent, StepId } from "@/lib/deck/pipeline";

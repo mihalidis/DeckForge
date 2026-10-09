@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Navbar logosuyla aynı: accent → accent-deep, ortada ink elmas. Renkler design/tokens.md'den. -->
+  <!-- Same as the navbar logo: accent → accent-deep, ink diamond in the center. Colors from design/tokens.md. -->
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#e0a64b"/>

@@ -5,7 +5,7 @@ import { META, RAW } from "./fixtures";
 const L = buildLookups(META);
 
 describe("stripCardText", () => {
-  it("HTML, $ ve satır sonlarını temizler", () => {
+  it("strips HTML, $ and line breaks", () => {
     expect(stripCardText(RAW[0].text)).toBe(
       "Battlecry: Repeat all other Battlecries from cards you played this game (targets chosen randomly).",
     );
@@ -15,7 +15,7 @@ describe("stripCardText", () => {
 });
 
 describe("normalizeCard", () => {
-  it("id → slug çevirir, dbfId'yi korur", () => {
+  it("converts id → slug, keeps dbfId", () => {
     const c = normalizeCard(RAW[0], L);
     expect(c.dbfId).toBe(61550);
     expect(c.classSlug).toBe("shaman");
@@ -26,7 +26,7 @@ describe("normalizeCard", () => {
     expect(c.keywords).toEqual(["battlecry"]);
     expect(c.attack).toBe(6);
   });
-  it("tribe, spell school, dual-class ve rune alanlarını işler", () => {
+  it("handles tribe, spell school, dual-class and rune fields", () => {
     expect(normalizeCard(RAW[1], L).minionTypes).toEqual(["murloc"]);
     expect(normalizeCard(RAW[2], L).spellSchool).toBe("nature");
     const dual = normalizeCard(RAW[3], L);
@@ -41,11 +41,11 @@ describe("normalizeCard", () => {
 });
 
 describe("standardSetSlugs", () => {
-  it("setGroups'tan okur, yaklaşan (hyped) seti hariç tutar", () => {
+  it("reads from setGroups, excludes the upcoming (hyped) set", () => {
     expect(standardSetSlugs(META)).toEqual(["core", "whizbangs-workshop"]);
     expect(standardSetSlugs(META, { includeUpcoming: true })).toEqual(["core", "whizbangs-workshop", "next-set"]);
   });
-  it("grup yoksa hata verir", () => {
+  it("throws when the group is missing", () => {
     expect(() => standardSetSlugs({ ...META, setGroups: [] })).toThrow(/standard/);
   });
 });

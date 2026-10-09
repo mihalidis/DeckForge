@@ -8,7 +8,7 @@ const mk = (dbfId: number, name: string, count: 1 | 2, dust = 40): DeckCard => (
 });
 
 describe("diffDecks", () => {
-  it("çıkan/giren kartları ve dust farkını hesaplar", () => {
+  it("computes removed/added cards and the dust difference", () => {
     const before = [mk(1, "A", 2), mk(2, "B", 1, 1600), mk(3, "C", 2)];
     const after = [mk(1, "A", 1), mk(3, "C", 2), mk(4, "D", 2, 100)];
     const d = diffDecks(before, after);

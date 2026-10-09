@@ -1,9 +1,9 @@
-// Deste kuralları — tek kaynak. Değiştirmeden önce validate.test.ts'i güncelle.
+// Deck rules — single source of truth. Update validate.test.ts before changing.
 
 export const DECK_SIZE = 30;
 export const MAX_COPIES = 2;
 export const MAX_LEGENDARY_COPIES = 1;
-export const MAX_RUNES = 3; // Death Knight: deste toplam 3 rune slotu
+export const MAX_RUNES = 3; // Death Knight: 3 rune slots per deck in total
 export const NEUTRAL = "neutral";
 
 /** deckstring FormatType */

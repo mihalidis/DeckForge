@@ -3,7 +3,7 @@ import type { CardRecord } from "@/lib/cards/types";
 export type Archetype = "aggro" | "midrange" | "control" | "combo" | "unspecified";
 export type DeckFormat = "standard";
 
-/** LLM'den gelen / doğrulayıcıya giren ham deste: sadece id + adet. */
+/** Raw deck from the LLM / into the validator: just id + count. */
 export interface DeckSpec {
   classSlug: string;
   format: DeckFormat;
@@ -27,13 +27,13 @@ export interface DeckSection {
 }
 
 export interface DeckResult {
-  id: string; // deckstring'in kısa hash'i
+  id: string; // short hash of the deckstring
   name: string;
   classSlug: string;
   className: string;
   format: DeckFormat;
   archetype: Archetype;
-  cards: DeckCard[]; // maliyete göre sıralı
+  cards: DeckCard[]; // sorted by cost
   cardCount: number;
   dust: number;
   deckstring: string;
@@ -43,7 +43,7 @@ export interface DeckResult {
   verifiedByBlizzard: boolean;
 }
 
-/** DeckResult'ın LLM açıklamaları olmayan mekanik kısmı (assemble, /api/deck, /d/[code]). */
+/** The mechanical part of DeckResult without LLM explanations (assemble, /api/deck, /d/[code]). */
 export type DeckCore = Pick<DeckResult, "id" | "name" | "classSlug" | "className" | "format" | "archetype" | "cards" | "cardCount" | "dust" | "deckstring" | "clipboardText">;
 
 export type ValidationCode =

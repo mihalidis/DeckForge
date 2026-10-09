@@ -3,7 +3,7 @@ import { en } from "@/i18n/en";
 import type { DeckResult } from "@/lib/deck/types";
 import { CopyIcon, CopyToast, useCopy } from "./CopyButton";
 
-/** Mobil: ekranın altına yapışık kopyala çubuğu (design/screens.md → mobil). */
+/** Mobile: copy bar stuck to the bottom of the screen (design/screens.md → mobile). */
 export function StickyCopyBar({ deck }: { deck: DeckResult }) {
   const { copied, copy } = useCopy(deck.clipboardText);
   return (

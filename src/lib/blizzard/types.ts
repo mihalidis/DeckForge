@@ -1,12 +1,12 @@
-// Blizzard Hearthstone Game Data API yanıt tipleri (ham şekil). Normalize edilmiş kart tipi src/lib/cards/types.ts'te.
-// Referans: docs/API-NOTLARI.md
+// Blizzard Hearthstone Game Data API response types (raw shape). The normalized card type is in src/lib/cards/types.ts.
+// Reference: docs/API-NOTES.md
 
 export type Region = "us" | "eu" | "kr" | "tw";
 
 export interface OAuthTokenResponse {
   access_token: string;
   token_type: "bearer";
-  expires_in: number; // saniye (~86399)
+  expires_in: number; // seconds (~86399)
   sub?: string;
 }
 
@@ -15,7 +15,7 @@ export interface MetadataSet {
   name: string;
   slug: string;
   type?: string;
-  hyped?: boolean; // true = duyurulmuş ama henüz oynanamayan (yaklaşan) set
+  hyped?: boolean; // true = announced but not yet playable (upcoming) set
   releaseDate?: string | null;
   collectibleCount?: number;
   collectibleRevealedCount?: number;
@@ -25,9 +25,9 @@ export interface MetadataSet {
 }
 
 export interface MetadataSetGroup {
-  slug: string; // "standard" | "wild" | yıl slug'ları ...
+  slug: string; // "standard" | "wild" | year slugs ...
   name: string;
-  cardSets: string[]; // set slug listesi
+  cardSets: string[]; // list of set slugs
   standard?: boolean;
   year?: number;
   yearRange?: string;
@@ -39,7 +39,7 @@ export interface MetadataClass {
   id: number;
   slug: string; // "shaman", "neutral", ...
   name: string;
-  cardId?: number; // temel kahraman dbfId
+  cardId?: number; // base hero dbfId
   heroPowerCardId?: number;
   alternateHeroCardIds?: number[];
 }
@@ -85,7 +85,7 @@ export interface ApiCard {
   id: number; // dbfId
   collectible: 0 | 1;
   slug: string;
-  classId: number | null; // dual/multi-class kartlarda null gelir; sınıflar multiClassIds'te
+  classId: number | null; // null for dual/multi-class cards; classes are in multiClassIds
   multiClassIds: number[];
   cardTypeId: number;
   cardSetId: number;

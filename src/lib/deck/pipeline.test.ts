@@ -1,4 +1,4 @@
-// LLM'siz uçtan uca: intent ve build mock'lanır, doğrulayıcı/onarım/encode gerçek çalışır.
+// End-to-end without LLM: intent and build are mocked, validator/repair/encode run for real.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
 import os from "node:os";
@@ -46,7 +46,7 @@ beforeEach(async () => {
 afterEach(() => vi.restoreAllMocks());
 
 describe("forgeDeck", () => {
-  it("geçerli deste → kod, pano metni, bölümler, swap", async () => {
+  it("valid deck → code, clipboard text, sections, swap", async () => {
     parseIntent.mockResolvedValue(baseIntent);
     buildDeck.mockResolvedValue(buildOut(goodCards));
     const { forgeDeck } = await import("./pipeline");
@@ -63,11 +63,11 @@ describe("forgeDeck", () => {
     expect(steps).toEqual(["intent:start", "intent:done", "retrieve:start", "retrieve:done", "build:start", "build:done", "validate:start", "validate:done", "encode:start", "encode:done"]);
   });
 
-  it("geçersiz deste → LLM onarımı, sonra mekanik onarım", async () => {
+  it("invalid deck → LLM repair, then mechanical repair", async () => {
     parseIntent.mockResolvedValue(baseIntent);
-    const bad = [{ dbfId: 1, count: 2 }, { dbfId: 300, count: 1 }, ...goodCards.slice(1, 10)]; // legendary x2, mage kartı, 20 kart
+    const bad = [{ dbfId: 1, count: 2 }, { dbfId: 300, count: 1 }, ...goodCards.slice(1, 10)]; // legendary x2, mage card, 20 cards
     buildDeck.mockResolvedValue(buildOut(bad));
-    repairDeck.mockResolvedValue(bad); // LLM düzeltemiyor
+    repairDeck.mockResolvedValue(bad); // LLM can't fix it
     const { forgeDeck } = await import("./pipeline");
     const deck = await forgeDeck("Shudderwock Shaman", { maxRepairRounds: 2 });
     expect(repairDeck).toHaveBeenCalledTimes(2);
@@ -76,7 +76,7 @@ describe("forgeDeck", () => {
     expect(deck.cards.some((c) => c.dbfId === 300)).toBe(false);
   });
 
-  it("belirsiz prompt → vague hatası; bilinmeyen seed → rotated", async () => {
+  it("vague prompt → vague error; unknown seed → rotated", async () => {
     const { forgeDeck, ForgeError } = await import("./pipeline");
     parseIntent.mockResolvedValue({ ...baseIntent, classSlug: null, seedCards: [], needsClarification: true, clarificationQuestion: "Which class?" });
     await expect(forgeDeck("aggro")).rejects.toMatchObject({ kind: "vague", message: "Which class?" });
@@ -86,7 +86,7 @@ describe("forgeDeck", () => {
     expect(err.kind).toBe("rotated");
   });
 
-  it("seed kartın sınıfı yanlışsa rotated/class hatası", async () => {
+  it("rotated/class error when the seed card has the wrong class", async () => {
     parseIntent.mockResolvedValue({ ...baseIntent, classSlug: "mage", seedCards: ["Shudderwock"] });
     const { forgeDeck } = await import("./pipeline");
     await expect(forgeDeck("Shudderwock Mage")).rejects.toMatchObject({ kind: "rotated" });

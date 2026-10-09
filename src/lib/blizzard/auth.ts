@@ -1,5 +1,5 @@
-// Battle.net OAuth client-credentials token yönetimi.
-// Token yalnızca sunucuda tutulur; bellek önbelleği + süre dolmadan 5 dk önce yenileme.
+// Battle.net OAuth client-credentials token management.
+// The token lives only on the server; in-memory cache + refresh 5 min before expiry.
 
 import type { OAuthTokenResponse } from "./types";
 
@@ -19,7 +19,7 @@ function readCredentials() {
   const secret = process.env.BLIZZARD_CLIENT_SECRET;
   if (!id || !secret) {
     throw new Error(
-      "BLIZZARD_CLIENT_ID / BLIZZARD_CLIENT_SECRET tanımlı değil (.env.local)",
+      "BLIZZARD_CLIENT_ID / BLIZZARD_CLIENT_SECRET are not set (.env.local)",
     );
   }
   return { id, secret };
@@ -39,7 +39,7 @@ async function requestToken(fetchImpl: typeof fetch): Promise<CachedToken> {
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(`Battle.net token alınamadı: HTTP ${res.status} ${body.slice(0, 200)}`);
+    throw new Error(`Failed to get Battle.net token: HTTP ${res.status} ${body.slice(0, 200)}`);
   }
   const json = (await res.json()) as OAuthTokenResponse;
   return {
@@ -48,7 +48,7 @@ async function requestToken(fetchImpl: typeof fetch): Promise<CachedToken> {
   };
 }
 
-/** Geçerli bir access token döner; gerekirse yeniler. Eşzamanlı çağrılar tek isteği paylaşır. */
+/** Returns a valid access token, refreshing if needed. Concurrent calls share a single request. */
 export async function getAccessToken(opts: { force?: boolean; fetchImpl?: typeof fetch } = {}) {
   const fetchImpl = opts.fetchImpl ?? fetch;
   if (!opts.force && cache && cache.expiresAt - Date.now() > REFRESH_MARGIN_MS) {
@@ -68,7 +68,7 @@ export async function getAccessToken(opts: { force?: boolean; fetchImpl?: typeof
   return t.accessToken;
 }
 
-/** Testler için önbelleği sıfırlar. */
+/** Resets the cache for tests. */
 export function resetTokenCache() {
   cache = null;
   inflight = null;

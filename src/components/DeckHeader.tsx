@@ -17,7 +17,7 @@ interface Props {
   shareLabel?: string;
 }
 
-/** Tasarım 1c: sol sabit panel. Mobilde akışta kalır; kopyala butonu ayrıca StickyCopyBar'da. */
+/** Design 1c: fixed left panel. Stays in the flow on mobile; the copy button is also in StickyCopyBar. */
 export function DeckHeader({ deck, name, onNameChange, onRegenerate, onTweak, onShare, shareLabel }: Props) {
   const color = CLASS_COLOR_VAR[deck.classSlug as ClassSlug];
   const avg = (deck.cards.reduce((s, c) => s + c.cost * c.count, 0) / deck.cardCount).toFixed(1);

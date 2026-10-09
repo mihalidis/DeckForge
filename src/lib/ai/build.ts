@@ -9,7 +9,7 @@ export interface BuildContext {
   intent: Intent;
   classSlug: ClassSlug;
   seeds: CardRecord[];
-  compact: string; // aday kart bloğu
+  compact: string; // candidate card block
   userPrompt: string;
 }
 
@@ -47,7 +47,7 @@ export async function buildDeck(ctx: BuildContext): Promise<{ output: BuildOutpu
   });
 }
 
-/** Doğrulayıcı hatalarını gönderip yalnızca kart listesini düzelttirir. */
+/** Sends validator errors and has the model fix only the card list. */
 export async function repairDeck(
   ctx: BuildContext,
   current: { dbfId: number; count: number }[],

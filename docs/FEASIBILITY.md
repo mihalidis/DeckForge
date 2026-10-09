@@ -1,48 +1,48 @@
-# DeckForge — Fizibilite Raporu
+# DeckForge — Feasibility Report
 
-Tarih: 2026-10-07 · Durum: **Yapılabilir (orta zorluk)**
+Date: 2026-10-07 · Status: **Feasible (medium difficulty)**
 
-## Özet
+## Summary
 
-Kullanıcının serbest metin isteğinden ("şu kartı baz alan bir deck hazırla") geçerli bir Hearthstone destesi üretip oyuna doğrudan yapıştırılabilen deck kodu vermek teknik olarak mümkündür. Üç yapı taşının tamamı hazır ve ücretsiz:
+Generating a valid Hearthstone deck from a user's free-text request ("build a deck around this card") and returning a deck code that can be pasted directly into the game is technically possible. All three building blocks are available and free:
 
-1. **Kart verisi:** Blizzard'ın resmi Hearthstone Game Data API'si (OAuth client-credentials, ücretsiz, 36.000 istek/saat).
-2. **Deck kodu:** Açık ve belgelenmiş bir format (HearthSim "deckstring"); `deckstrings` npm paketi ile encode/decode yapılır. Blizzard API'nin `/hearthstone/deck` ucu da kodu doğrulayıp genişletir.
-3. **Yapay zeka:** Vercel AI SDK üzerinden sağlayıcıdan bağımsız; varsayılan **Google Gemini Flash (ücretsiz API katmanı)**, geliştirme için Ollama, istenirse Claude. Asıl zorluk LLM'in kuralları ezbere bilmesi değil; kart havuzunu doğru şekilde önüne koymak ve çıktıyı **deterministik bir doğrulayıcıdan** geçirmektir.
+1. **Card data:** Blizzard's official Hearthstone Game Data API (OAuth client-credentials, free, 36,000 requests/hour).
+2. **Deck code:** An open, documented format (HearthSim "deckstring"); encode/decode with the `deckstrings` npm package. The Blizzard API's `/hearthstone/deck` endpoint also validates and expands the code.
+3. **AI:** Provider-agnostic via the Vercel AI SDK; default is **Google Gemini Flash (free API tier)**, Ollama for development, Claude if desired. The real challenge is not the LLM knowing the rules by heart; it is putting the card pool in front of it correctly and running the output through a **deterministic validator**.
 
-Risk, "deste geçersiz" (31 kart, 2 legendary, sınıf dışı kart, Standard'dan çıkmış kart) ve "deste kötü" (sinerji yok) ikilisinde toplanır. İlki kodla tamamen çözülür; ikincisi iyi retrieval + kural tabanlı rehberlik + değerlendirme seti ile yönetilir.
+The risk boils down to two things: "invalid deck" (31 cards, 2 copies of a legendary, off-class card, card rotated out of Standard) and "bad deck" (no synergy). The first is fully solved in code; the second is managed with good retrieval + rule-based guidance + an evaluation set.
 
-## 1. Kart verisi — Blizzard Hearthstone Game Data API
+## 1. Card data — Blizzard Hearthstone Game Data API
 
-| Konu | Bulgu |
+| Topic | Finding |
 |---|---|
-| Kayıt | https://develop.battle.net → Battle.net hesabı → "Create Client" → `client_id` + `client_secret`. Ücretsiz. |
-| Yetkilendirme | `POST https://oauth.battle.net/token` (`grant_type=client_credentials`, Basic auth). Token ~24 saat geçerli; sunucuda önbelleğe alınır. Tarayıcıya **asla** gönderilmez. |
-| Taban adres | `https://{region}.api.blizzard.com/hearthstone/...` — `region`: `us`, `eu`, `kr`, `tw`. Kart verisi bölgeden bağımsız; `eu` kullanacağız. |
-| Dil | `locale=en_US` (ayrıca de_DE, fr_FR, es_ES, pt_BR, ru_RU, ko_KR, zh_TW, ja_JP, …). **Türkçe yok**; TR arayüz metni bizim, kart metinleri İngilizce kalır. |
-| Kart arama | `GET /cards?set=standard&collectible=1&class=shaman,neutral&manaCost=3&keyword=battlecry&textFilter=...&pageSize=500&page=1&sort=manaCost:asc` |
-| Tek kart | `GET /cards/{id veya slug}` |
-| Deste | `GET /deck?code=AAEC...` (kodu çözer) veya `GET /deck?ids=1,2,3&hero=7` (koddan deste üretir, `deckCode` döner). Sideboard için `sideboardCards` parametresi. |
-| Metadata | `GET /metadata` → `sets`, `setGroups` (Standard'daki setler **buradan** okunur, elle yazılmaz), `classes` (her sınıfın hero `cardId`'si), `types`, `rarities`, `minionTypes`, `spellSchools`, `keywords`. |
-| Kart alanları | `id` (**= dbfId, deck kodunda kullanılan sayı**), `slug`, `name`, `text`, `manaCost`, `attack`, `health`, `classId`, `multiClassIds`, `cardTypeId`, `cardSetId`, `rarityId`, `minionTypeId`, `keywordIds`, `image`, `cropImage`, `flavorText`, `collectible`. |
-| Limitler | 36.000 istek/saat, 100 istek/saniye. Standard havuzu (~1.500–1.900 koleksiyon kartı) `pageSize=500` ile 4–5 istekte çekilir. |
-| Yedek kaynak | HearthstoneJSON (`api.hearthstonejson.com/v1/latest/enUS/cards.collectible.json`) — key yok, topluluk kaynağı; `mechanics` dizisi Blizzard'dan daha zengin. Blizzard birincil, HSJSON yedek/çapraz kontrol. |
-| Kullanım şartları | Blizzard API Terms of Use + Fan Content Policy: kaynak belirtme, resmi logo/çerçeve kullanmama, ticari kullanımda dikkat. Kart görselleri Blizzard CDN URL'leri üzerinden gösterilir (indirip dağıtılmaz). |
+| Registration | https://develop.battle.net → Battle.net account → "Create Client" → `client_id` + `client_secret`. Free. |
+| Authorization | `POST https://oauth.battle.net/token` (`grant_type=client_credentials`, Basic auth). Token valid for ~24 hours; cached on the server. **Never** sent to the browser. |
+| Base URL | `https://{region}.api.blizzard.com/hearthstone/...` — `region`: `us`, `eu`, `kr`, `tw`. Card data is region-independent; we will use `eu`. |
+| Language | `locale=en_US` (also de_DE, fr_FR, es_ES, pt_BR, ru_RU, ko_KR, zh_TW, ja_JP, …). **No Turkish**; the TR UI text is ours, card texts stay in English. |
+| Card search | `GET /cards?set=standard&collectible=1&class=shaman,neutral&manaCost=3&keyword=battlecry&textFilter=...&pageSize=500&page=1&sort=manaCost:asc` |
+| Single card | `GET /cards/{id or slug}` |
+| Deck | `GET /deck?code=AAEC...` (decodes the code) or `GET /deck?ids=1,2,3&hero=7` (builds a deck from ids, returns `deckCode`). `sideboardCards` parameter for sideboards. |
+| Metadata | `GET /metadata` → `sets`, `setGroups` (the sets in Standard are read **from here**, never hand-written), `classes` (each class's hero `cardId`), `types`, `rarities`, `minionTypes`, `spellSchools`, `keywords`. |
+| Card fields | `id` (**= dbfId, the number used in the deck code**), `slug`, `name`, `text`, `manaCost`, `attack`, `health`, `classId`, `multiClassIds`, `cardTypeId`, `cardSetId`, `rarityId`, `minionTypeId`, `keywordIds`, `image`, `cropImage`, `flavorText`, `collectible`. |
+| Limits | 36,000 requests/hour, 100 requests/second. The Standard pool (~1,500–1,900 collectible cards) is fetched in 4–5 requests with `pageSize=500`. |
+| Fallback source | HearthstoneJSON (`api.hearthstonejson.com/v1/latest/enUS/cards.collectible.json`) — no key, community source; its `mechanics` array is richer than Blizzard's. Blizzard is primary, HSJSON is fallback/cross-check. |
+| Terms of use | Blizzard API Terms of Use + Fan Content Policy: attribution, no official logos/frames, care with commercial use. Card images are shown via Blizzard CDN URLs (not downloaded and redistributed). |
 
-**Karar:** Kart havuzu her istekte Blizzard'dan çekilmez. Günde bir kez (ve yama sonrası elle) `/metadata` + Standard koleksiyon kartları çekilip yerel bir JSON/SQLite önbelleğine yazılır. LLM ve arama katmanı bu önbellekten çalışır; Blizzard yalnızca senkron ve son doğrulama için çağrılır.
+**Decision:** The card pool is not fetched from Blizzard on every request. Once a day (and manually after a patch) `/metadata` + Standard collectible cards are fetched and written to a local JSON/SQLite cache. The LLM and search layers work from this cache; Blizzard is called only for sync and final validation.
 
-## 2. Deck kodu (deckstring)
+## 2. Deck code (deckstring)
 
-Format HearthSim tarafından belgelenmiştir ve oyunun kullandığı formatın aynısıdır:
+The format is documented by HearthSim and is identical to the format the game uses:
 
 ```
 base64( 0x00 | version=1 | format | heroes[] | 1x cards[] | 2x cards[] | n-x (dbfId,count)[] [| sideboard] )
 ```
 
-- Tüm sayılar unsigned varint. `format`: 1 Wild, 2 Standard, 3 Classic, 4 Twist.
-- `heroes`: sınıfın temel kahraman dbfId'si (metadata `classes[].cardId`'den okunur).
-- Kartlar dbfId'ye göre artan sıralı → "kanonik" kod.
-- Oyun, `#` ile başlayan satırları yok sayar; `### Deste Adı` satırı deste adı olarak alınır. Yani panoya şunu kopyalatırız:
+- All numbers are unsigned varints. `format`: 1 Wild, 2 Standard, 3 Classic, 4 Twist.
+- `heroes`: the class's base hero dbfId (read from metadata `classes[].cardId`).
+- Cards sorted ascending by dbfId → "canonical" code.
+- The game ignores lines starting with `#`; the `### Deck Name` line is taken as the deck name. So we copy this to the clipboard:
 
 ```
 ### Shudderwock Shaman
@@ -54,54 +54,54 @@ AAECAaoIBMmbBOW...
 # To use this deck, copy it to your clipboard and create a new deck in Hearthstone
 ```
 
-- `deckstrings` npm paketi: `encode({cards:[[dbfId,count]], heroes:[dbfId], format:2, sideboardCards:[[dbfId,count,ownerDbfId]]})` / `decode()`. Üretilen kod `GET /deck?code=` ile Blizzard'a doğrulatılır — hem kodun hem kart listesinin tutarlı olduğunun kanıtı olur.
+- `deckstrings` npm package: `encode({cards:[[dbfId,count]], heroes:[dbfId], format:2, sideboardCards:[[dbfId,count,ownerDbfId]]})` / `decode()`. The generated code is verified against Blizzard via `GET /deck?code=` — proof that both the code and the card list are consistent.
 
-## 3. Yapay zeka katmanı
+## 3. AI layer
 
-Naif yaklaşım (tüm kartları prompt'a dök, "30 kart seç" de) çalışır ama pahalı ve hatalıdır. Önerilen boru hattı:
+The naive approach (dump all cards into the prompt, say "pick 30 cards") works but is expensive and error-prone. Proposed pipeline:
 
-1. **Niyet çözümleme (LLM, küçük model):** Prompt → `{class, format, seedCards[], archetype, budget, mustInclude[], mustExclude[], style}` JSON. Sınıf belirsizse seed karttan çıkarılır; o da yoksa kullanıcıya tek soru sorulur.
-2. **Aday havuzu (kod):** Önbellekten `class ∪ neutral` ve Standard filtresi. Seed kartın etiketleriyle (tribe, keyword, spell school, metin anahtar kelimeleri) puanlanıp ~250–400 aday seçilir. Her kart ~40 token'lık sıkıştırılmış satır: `id|name|cost|atk/hp|type|rarity|text`.
-3. **Deste seçimi (LLM):** Sistem prompt'unda deste kuralları + arketip rehberi; aday listesi sıkıştırılmış formatta gönderilir (Gemini'nin 1M bağlam penceresi havuzu rahat taşır; ücretli sağlayıcıya geçilirse prompt cache devreye alınır). Çıktı: `{cards:[{id,count}], name, gamePlan, mulligan, swaps}` — Vercel AI SDK `generateObject` ile Zod şeması zorunlu.
-4. **Doğrulayıcı (kod, deterministik):** 30 kart, legendary ≤1, diğer ≤2, sınıf uyumu (`classId`/`multiClassIds`/neutral), Standard set kontrolü, DK rune kısıtı, sideboard kuralları (Zilliax, E.T.C.). Hata varsa LLM'e **sadece hatalar** gönderilip onarım turu istenir (en fazla 2 tur); hâlâ bozuksa kod eksikleri en yüksek puanlı adaylarla doldurur.
-5. **Kodlama + doğrulama:** `deckstrings.encode` → Blizzard `/deck?code=` → kart listesi eşleşmesi.
+1. **Intent parsing (LLM, small model):** Prompt → `{class, format, seedCards[], archetype, budget, mustInclude[], mustExclude[], style}` JSON. If the class is ambiguous it is inferred from the seed card; if that is missing too, the user is asked a single question.
+2. **Candidate pool (code):** `class ∪ neutral` and the Standard filter from the cache. Cards are scored against the seed card's tags (tribe, keyword, spell school, text keywords) and ~250–400 candidates are selected. Each card is a ~40-token compact line: `id|name|cost|atk/hp|type|rarity|text`.
+3. **Deck selection (LLM):** Deck rules + archetype guide in the system prompt; the candidate list is sent in compact format (Gemini's 1M context window easily fits the pool; if we switch to a paid provider, prompt caching is enabled). Output: `{cards:[{id,count}], name, gamePlan, mulligan, swaps}` — Zod schema enforced via Vercel AI SDK `generateObject`.
+4. **Validator (code, deterministic):** 30 cards, legendary ≤1, others ≤2, class match (`classId`/`multiClassIds`/neutral), Standard set check, DK rune constraint, sideboard rules (Zilliax, E.T.C.). If there are errors, **only the errors** are sent to the LLM for a repair round (at most 2 rounds); if it is still broken, code fills the gaps with the highest-scoring candidates.
+5. **Encoding + verification:** `deckstrings.encode` → Blizzard `/deck?code=` → card list match.
 
-Tahmini maliyet: Gemini Flash ücretsiz katmanında **$0** (günlük/dakikalık istek limitleri dahilinde; limitler değişebilir, güncel değerler ai.google.dev/gemini-api/docs/rate-limits). Trafik artarsa ücretli katman veya Claude'a `.env` değişikliğiyle geçilir (o durumda istek başına ~$0.01–0.03). Süre: 8–20 sn; adım adım ilerleme UI'da gösterilir.
+Estimated cost: **$0** on the Gemini Flash free tier (within daily/per-minute request limits; limits may change, current values at ai.google.dev/gemini-api/docs/rate-limits). If traffic grows, switch to a paid tier or Claude with a `.env` change (~$0.01–0.03 per request in that case). Time: 8–20 s; step-by-step progress is shown in the UI.
 
-**Not:** Google One AI Pro / Gemini uygulaması aboneliği API kullanımını kapsamaz; API anahtarı aistudio.google.com'dan ayrı ve ücretsiz alınır, kredi kartı gerekmez. Ücretsiz katmanda Pro modelleri yok, Flash modelleri var; bizim iş için Flash yeterli.
+**Note:** A Google One AI Pro / Gemini app subscription does not cover API usage; the API key is obtained separately and for free from aistudio.google.com, no credit card required. The free tier has no Pro models but does have Flash models; Flash is enough for our purposes.
 
-**Bilinen sınırlar:** Meta/winrate verisi resmi API'de yok (HSReplay vb. kazımak ToS riski). Arketip bilgisi LLM'in genel bilgisi + bizim yazdığımız kısa `docs/ARCHETYPES.md` rehberinden gelir. Yeni genişleme çıktığında LLM yeni kartları "tanımaz" ama metinlerini okuyarak yine kullanabilir; bu yüzden kart metni her zaman prompt'a girer.
+**Known limitations:** Meta/winrate data is not in the official API (scraping HSReplay etc. is a ToS risk). Archetype knowledge comes from the LLM's general knowledge + the short `docs/ARCHETYPES.md` guide we write. When a new expansion releases, the LLM won't "know" the new cards but can still use them by reading their text; this is why card text always goes into the prompt.
 
-## 4. Teknik yığın (karar verildi)
+## 4. Tech stack (decided)
 
-- **Next.js 15 (App Router) + TypeScript + Tailwind + shadcn/ui**
-- **Route Handlers** (`app/api/*`) Blizzard ve Claude çağrılarını sunucuda yapar; anahtarlar `.env`'de.
-- **Veri önbelleği:** Faz 1'de `data/cards.standard.json` (repo'da değil, build/cron ile üretilir); büyürse SQLite/Turso.
-- **LLM:** Vercel AI SDK (`ai` + `@ai-sdk/google`), `generateObject` ile Zod şemalı çıktı. Sağlayıcı `.env`'den seçilir: `google` (varsayılan, ücretsiz), `ollama` (yerel geliştirme), `anthropic` (opsiyonel).
-- **Deck kodu:** `deckstrings` npm.
-- **Deploy:** Vercel; günlük kart senkronu Vercel Cron.
-- **Test:** Vitest (doğrulayıcı + deckstring round-trip), Playwright (akış).
+- **Next.js 16 (App Router, Turbopack) + TypeScript + Tailwind v4** (CSS-first tokens, hand-written components, no shadcn/ui)
+- **Route Handlers** (`app/api/*`) make the Blizzard and Claude calls on the server; keys live in `.env`.
+- **Data cache:** `data/cards.standard.json` in Phase 1 (not in the repo, generated by build/cron); SQLite/Turso if it grows.
+- **LLM:** Vercel AI SDK (`ai` + `@ai-sdk/google`), Zod-schema output via `generateObject`. Provider is selected from `.env`: `google` (default, free), `ollama` (local development), `anthropic` (optional).
+- **Deck code:** `deckstrings` npm.
+- **Deploy:** Vercel; daily card sync via Vercel Cron.
+- **Tests:** Vitest (validator + deckstring round-trip), Playwright (flow).
 
-## 5. Riskler ve önlemler
+## 5. Risks and mitigations
 
-| Risk | Olasılık | Önlem |
+| Risk | Likelihood | Mitigation |
 |---|---|---|
-| LLM geçersiz deste üretir | Yüksek | Deterministik doğrulayıcı + onarım turu + Blizzard `/deck` doğrulaması. Geçersiz deste kullanıcıya **asla** gösterilmez. |
-| Standard rotasyonu / yeni set | Kesin (yılda 3 set + Nisan rotasyonu) | Set listesi metadata'dan okunur; günlük senkron; yama sonrası manuel tetik. |
-| Blizzard API kesintisi | Düşük | Önbellek üzerinden çalışmaya devam; sadece son doğrulama atlanır ve kullanıcıya not düşülür. |
-| Deste kalitesi zayıf | Orta | 30 prompt'luk değerlendirme seti; arketip rehberi; seed-kart sinerji puanlaması. |
-| Maliyet | Düşük | Gemini ücretsiz katmanı; istek başı limit; sağlayıcı soyutlaması sayesinde gerekirse geçiş. |
-| Ücretsiz katman kotası dolar / değişir | Orta | Vercel AI SDK ile sağlayıcı tek env değişkeni; UI'da "şu an yoğunluk var" durumu; Faz 4'te istek kuyruğu. |
-| Hukuki | Düşük | Fan Content Policy'ye uygun görsel kullanımı, footer'da sorumluluk reddi, resmi logo yok. |
+| LLM produces an invalid deck | High | Deterministic validator + repair round + Blizzard `/deck` verification. An invalid deck is **never** shown to the user. |
+| Standard rotation / new set | Certain (3 sets a year + April rotation) | Set list read from metadata; daily sync; manual trigger after a patch. |
+| Blizzard API outage | Low | Keep working from the cache; only final verification is skipped and the user is notified. |
+| Weak deck quality | Medium | 30-prompt evaluation set; archetype guide; seed-card synergy scoring. |
+| Cost | Low | Gemini free tier; per-request limit; provider abstraction allows switching if needed. |
+| Free tier quota runs out / changes | Medium | Provider is a single env variable via the Vercel AI SDK; "high demand right now" state in the UI; request queue in Phase 4. |
+| Legal | Low | Image usage compliant with the Fan Content Policy, disclaimer in the footer, no official logos. |
 
-## 6. Sonuç
+## 6. Conclusion
 
-Projenin tüm bağımlılıkları ücretsiz ve belgeli. MVP (Faz 0–3) tek geliştiriciyle gerçekçi biçimde **3–4 hafta**lık akşam/hafta sonu eforuyla çıkarılabilir. En kritik mühendislik yatırımı doğrulayıcı ve retrieval katmanıdır; UI ve API katmanları standarttır.
+All of the project's dependencies are free and documented. The MVP (Phases 0–3) can realistically be shipped by a single developer with **3–4 weeks** of evening/weekend effort. The most critical engineering investment is the validator and retrieval layer; the UI and API layers are standard.
 
-## Kaynaklar
+## Sources
 
-- Blizzard Hearthstone Game Data API dokümanı: https://develop.battle.net/documentation/hearthstone/game-data-apis
-- Kart arama rehberi: https://develop.battle.net/documentation/hearthstone/guides/card-search
-- Deckstring formatı (HearthSim): https://hearthsim.info/docs/deckstrings/
+- Blizzard Hearthstone Game Data API documentation: https://develop.battle.net/documentation/hearthstone/game-data-apis
+- Card search guide: https://develop.battle.net/documentation/hearthstone/guides/card-search
+- Deckstring format (HearthSim): https://hearthsim.info/docs/deckstrings/
 - `deckstrings` npm: https://www.npmjs.com/package/deckstrings · GitHub: https://github.com/hearthsim/hearthstone-deckstrings
 - HearthstoneJSON: https://hearthstonejson.com/docs/cards.html

@@ -1,5 +1,5 @@
 // GET /api/cards?q=shudder&class=shaman&cost=9&type=minion&limit=20
-// UI kart önizlemeleri için; LLM bu ucu kullanmaz (doğrudan repo'dan okur).
+// For UI card previews; the LLM does not use this endpoint (reads directly from the repo).
 
 import { NextResponse } from "next/server";
 import { searchCards } from "@/lib/cards/repo";

@@ -1,4 +1,4 @@
-// İstemcide de kullanılabilen saf yardımcılar (fs yok): diff ve URL kod dönüşümü.
+// Pure helpers usable on the client too (no fs): diff and URL code conversion.
 import type { DeckCard } from "./types";
 
 export interface DiffEntry { dbfId: number; name: string; count: number }
@@ -21,7 +21,7 @@ export function diffDecks(before: DeckCard[], after: DeckCard[]): DeckDiff {
   return { removed, added, dustDelta: dust(after) - dust(before) };
 }
 
-/** deckstring'i URL'de taşımak için base64url. */
+/** base64url for carrying the deckstring in a URL. */
 export const toUrlCode = (ds: string) => ds.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 export const fromUrlCode = (u: string) => {
   const b = u.replace(/-/g, "+").replace(/_/g, "/");

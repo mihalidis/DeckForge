@@ -1,41 +1,41 @@
-# DeckForge tasarım token'ları
+# DeckForge design tokens
 
-Kaynak: `export/DeckForge.dc.html` (Claude Design prototipi, inline stiller). `export/_ds/organic-*` klasörü Design'ın varsayılan "Organic" sistem iskeletidir, **bu projede kullanılmıyor** (açık krem tema; bizim tasarım koyu). Yok sayılır.
+Source: `export/DeckForge.dc.html` (Claude Design prototype, inline styles). The `export/_ds/organic-*` folder is Design's default "Organic" system skeleton and is **not used in this project** (light cream theme; our design is dark). Ignore it.
 
-Faz 3'te bu dosya `tailwind.config.ts` → `theme.extend` ve `app/globals.css` → `:root` değişkenlerinin tek kaynağıdır.
+This file is the single source for the Tailwind v4 `@theme` block in `src/app/globals.css` (there is no `tailwind.config`). New colors are added here first, then to `@theme`.
 
-## Renkler
+## Colors
 
-| Token | Hex | Kullanım (prototipteki rolü) |
+| Token | Hex | Usage (role in the prototype) |
 |---|---|---|
-| `bg` | `#0E1116` | Sayfa zemini (en koyu) |
-| `bg-raised` | `#141A24` | Kartlar, prompt kutusu, paneller |
-| `bg-glow` | `#1B2333` | Radial gradient tepe noktası (`radial-gradient(ellipse 90% 60% at 50% -10%, #1B2333 0%, #141A24 45%, #0E1116 100%)`) |
-| `bg-elevated` | `#1F2736` / `#1A2130` | Hover satırı, ikincil panel |
-| `fg` | `#F2E9D8` | Ana metin (parşömen) |
-| `fg-muted` | `#A9A396` | İkincil metin, açıklamalar |
-| `fg-subtle` | `#7F7B72` | Placeholder, etiketler, üçüncül |
-| `fg-dim` | `#D9D0BF` | Vurgulu ikincil metin |
-| `accent` | `#E0A64B` | Birincil aksiyon, başlık vurgusu, focus ring |
-| `accent-hover` | `#F2C676` | Link/buton hover |
-| `accent-deep` | `#B77A2C` / `#C68E3A` | Logo gradient alt ucu, basılı durum |
-| `arcane` | `#3FB9A8` | AI/"düşünüyor" durumu, adım izleyici, shimmer |
-| `danger` | `#E46056` | Hata, diff'te çıkan kart |
-| `success` | `#4FBF7F` | Kopyalandı toast'ı, diff'te giren kart |
-| `info` | `#5B8DEF` | Bilgi rozeti |
-| `mana` / `mana-deep` | `#5B8DEF` / `#2F4FB0` | Mana kristali gradient'i, mana eğrisi çubukları |
-| `dust` | `#C7B9E6` | Dust elması |
-| `archetype` | `#AEB7F0` | Arketip rozeti metni (zemin: class-shaman %18) |
-| `toast` | `#1E2A2A` | "Copied" toast zemini |
+| `bg` | `#0E1116` | Page background (darkest) |
+| `bg-raised` | `#141A24` | Cards, prompt box, panels |
+| `bg-glow` | `#1B2333` | Radial gradient peak (`radial-gradient(ellipse 90% 60% at 50% -10%, #1B2333 0%, #141A24 45%, #0E1116 100%)`) |
+| `bg-elevated` | `#1F2736` / `#1A2130` | Hover row, secondary panel |
+| `fg` | `#F2E9D8` | Main text (parchment) |
+| `fg-muted` | `#A9A396` | Secondary text, descriptions |
+| `fg-subtle` | `#7F7B72` | Placeholder, labels, tertiary |
+| `fg-dim` | `#D9D0BF` | Emphasized secondary text |
+| `accent` | `#E0A64B` | Primary action, heading accent, focus ring |
+| `accent-hover` | `#F2C676` | Link/button hover |
+| `accent-deep` | `#B77A2C` / `#C68E3A` | Logo gradient bottom end, pressed state |
+| `arcane` | `#3FB9A8` | AI/"thinking" state, step tracker, shimmer |
+| `danger` | `#E46056` | Error, removed card in diff |
+| `success` | `#4FBF7F` | Copied toast, added card in diff |
+| `info` | `#5B8DEF` | Info badge |
+| `mana` / `mana-deep` | `#5B8DEF` / `#2F4FB0` | Mana crystal gradient, mana curve bars |
+| `dust` | `#C7B9E6` | Dust gem |
+| `archetype` | `#AEB7F0` | Archetype badge text (background: class-shaman 18%) |
+| `toast` | `#1E2A2A` | "Copied" toast background |
 
-Saydam katmanlar (border ve yüzeyler), hepsi `fg` üzerinden:
-`rgba(242,233,216,.03)` zemin dokusu · `.08` ince ayraç · `.10` / `.12` kart kenarlığı · `.15` hover kenarlığı · `.20` aktif kenarlık.
-Aksan glow'ları: `rgba(224,166,75,.35)` selection, `.5` focus halkası; `rgba(63,185,168,.12/.15/.3)` arcane dolgu/kenarlık.
-Gölge: `rgba(0,0,0,.35)`; cam panel: `rgba(20,26,36,.6)` + blur.
+Translucent layers (borders and surfaces), all based on `fg`:
+`rgba(242,233,216,.03)` background texture · `.08` thin divider · `.10` / `.12` card border · `.15` hover border · `.20` active border.
+Accent glows: `rgba(224,166,75,.35)` selection, `.5` focus ring; `rgba(63,185,168,.12/.15/.3)` arcane fill/border.
+Shadow: `rgba(0,0,0,.35)`; glass panel: `rgba(20,26,36,.6)` + blur.
 
-### Sınıf renkleri (chip, alt çizgi, kart satırı aksanı)
+### Class colors (chip, underline, card row accent)
 
-| Sınıf | Hex |
+| Class | Hex |
 |---|---|
 | Mage | `#69CCF0` |
 | Warrior | `#C9433F` |
@@ -49,39 +49,39 @@ Gölge: `rgba(0,0,0,.35)`; cam panel: `rgba(20,26,36,.6)` + blur.
 | Demon Hunter | `#2FBF71` |
 | Death Knight | `#3C9AB0` |
 
-### Nadirlik (rarity gem)
+### Rarity (rarity gem)
 
 common `#9D9D9D` · rare `#4C8DF5` · epic `#A335EE` · legendary `#FF8000`
 Dust: common 40 · rare 100 · epic 400 · legendary 1600
 
-## Tipografi
+## Typography
 
-| Token | Font | Nerede |
+| Token | Font | Where |
 |---|---|---|
-| `font-display` | **Spectral** (Georgia fallback) — 500/600, italic 400 | H1 (64px/1.05, -0.01em), deste adı, logo yazısı (20px/600) |
-| `font-body` | **Manrope** — 400/500/600/700 | Tüm gövde ve UI |
-| `font-mono` | **JetBrains Mono** — 400/500 | Deck kodu bloğu, mana/istatistik sayıları |
+| `font-display` | **Spectral** (Georgia fallback) — 500/600, italic 400 | H1 (64px/1.05, -0.01em), deck name, logo text (20px/600) |
+| `font-body` | **Manrope** — 400/500/600/700 | All body text and UI |
+| `font-mono` | **JetBrains Mono** — 400/500 | Deck code block, mana/stat numbers |
 
-Google Fonts: `Spectral:ital,wght@0,400;0,500;0,600;1,400`, `Manrope:wght@400;500;600;700`, `JetBrains+Mono:wght@400;500`. Next.js'te `next/font/google` ile yüklenir.
+Google Fonts: `Spectral:ital,wght@0,400;0,500;0,600;1,400`, `Manrope:wght@400;500;600;700`, `JetBrains+Mono:wght@400;500`. Loaded in Next.js via `next/font/google`.
 
-Boyut ölçeği (px): 10 · 11 · 12 · 13 (en sık, kart satırı) · 14 · 15 (gövde taban, line-height 1.55) · 16 · 18 (alt başlık) · 20 · 22 · 24 · 26 · 28 · 64 (hero).
-Eyebrow/etiket: 12px, `letter-spacing: .14em`, uppercase, 600–700.
+Size scale (px): 10 · 11 · 12 · 13 (most common, card row) · 14 · 15 (body base, line-height 1.55) · 16 · 18 (subheading) · 20 · 22 · 24 · 26 · 28 · 64 (hero).
+Eyebrow/label: 12px, `letter-spacing: .14em`, uppercase, 600–700.
 
-## Köşe yarıçapı
+## Corner radius
 
-`pill` 999px (chip, buton, input) · `full` 50% (gem, avatar) · `xl` 16px (ana paneller, prompt kutusu) · `lg` 12–14px (kartlar, modal) · `md` 10px (satırlar, kod bloğu) · `sm` 8px (logo, küçük kutular) · `xs` 2–4px.
-Sohbet balonu: `16px 16px 16px 4px`.
+`pill` 999px (chip, button, input) · `full` 50% (gem, avatar) · `xl` 16px (main panels, prompt box) · `lg` 12–14px (cards, modal) · `md` 10px (rows, code block) · `sm` 8px (logo, small boxes) · `xs` 2–4px.
+Chat bubble: `16px 16px 16px 4px`.
 
-## Boşluk ve düzen
+## Spacing and layout
 
-Konteyner `max-width: 1440px`, yatay padding 48px. Landing içerik `max-width: 860px`, üst boşluk 72px. Dikey ritim 14 / 18 / 28 / 36 / 40px.
-Prompt kutusu: `bg-raised`, 1px `.12` kenarlık, radius 16, padding `18px 18px 14px`.
+Container `max-width: 1440px`, horizontal padding 48px. Landing content `max-width: 860px`, top spacing 72px. Vertical rhythm 14 / 18 / 28 / 36 / 40px.
+Prompt box: `bg-raised`, 1px `.12` border, radius 16, padding `18px 18px 14px`.
 
-## Efektler
+## Effects
 
-- Zemin dokusu: SVG `feTurbulence` fractalNoise, `opacity: .07`, tüm sayfada `pointer-events:none`.
-- `df-shimmer`: background-position 200% → -200% (arcane adım izleyicide).
-- `df-pulse`: `box-shadow 0 0 0 0 rgba(63,185,168,.45)` → `0 0 0 6px` şeffaf (aktif adım noktası).
-- `df-rise`: opacity 0 / translateY(8px) → 1 / 0 (sonuç kartlarının girişi).
+- Background texture: SVG `feTurbulence` fractalNoise, `opacity: .07`, `pointer-events:none` across the whole page.
+- `df-shimmer`: background-position 200% → -200% (in the arcane step tracker).
+- `df-pulse`: `box-shadow 0 0 0 0 rgba(63,185,168,.45)` → `0 0 0 6px` transparent (active step dot).
+- `df-rise`: opacity 0 / translateY(8px) → 1 / 0 (entrance of result cards).
 - Focus: `outline: 2px solid accent; outline-offset: 2px`. Selection: `rgba(224,166,75,.35)`.
-- Tema: yalnızca koyu. `prefers-color-scheme` dinlenmez.
+- Theme: dark only. `prefers-color-scheme` is not observed.

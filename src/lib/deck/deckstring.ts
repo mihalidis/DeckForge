@@ -1,5 +1,5 @@
-// Deckstring encode/decode ve oyun formatında panoya kopyalanacak metin.
-// Format: docs/API-NOTLARI.md → "Deckstring". Paket: deckstrings (dbfId tabanlı).
+// Deckstring encode/decode and the game-format text copied to the clipboard.
+// Format: docs/API-NOTES.md → "Deckstring". Package: deckstrings (dbfId-based).
 
 import { decode as dsDecode, encode as dsEncode } from "deckstrings";
 import type { CardRecord } from "@/lib/cards/types";
@@ -40,7 +40,7 @@ export interface ClipboardInput {
   cards: (Pick<CardRecord, "name" | "cost"> & { count: number })[];
 }
 
-/** Hearthstone'un kendi "Copy deck" çıktısıyla aynı biçim; oyun # satırlarını yok sayar, ### adı okur. */
+/** Same format as Hearthstone's own "Copy deck" output; the game ignores # lines and reads the name from ###. */
 export function toClipboardText(i: ClipboardInput): string {
   const lines = [...i.cards]
     .sort((a, b) => a.cost - b.cost || a.name.localeCompare(b.name))
@@ -58,7 +58,7 @@ export function toClipboardText(i: ClipboardInput): string {
   ].join("\n");
 }
 
-/** Paylaşım/URL için kısa, kararlı id. */
+/** Short, stable id for sharing/URLs. */
 export function shortIdOf(deckstring: string): string {
   let h = 2166136261;
   for (let i = 0; i < deckstring.length; i++) {

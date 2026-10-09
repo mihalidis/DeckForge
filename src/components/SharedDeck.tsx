@@ -10,7 +10,7 @@ import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
 import { StickyCopyBar } from "./StickyCopyBar";
 
-/** Paylaşılan deste görünümü: "why" bölümü yok (LLM çıktısı saklanmıyor). */
+/** Shared deck view: no "why" section (LLM output is not stored). */
 export function SharedDeck({ deck: core }: { deck: DeckCore }) {
   const [view, setView] = useState<"list" | "grid">("list");
   const [name, setName] = useState(core.name);

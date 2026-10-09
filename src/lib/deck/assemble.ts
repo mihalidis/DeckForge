@@ -1,5 +1,5 @@
-// Doğrulanmış bir DeckSpec'ten DeckResult'ın "mekanik" kısmını üretir: kartlar, dust, deckstring, pano metni, id.
-// pipeline (ilk üretim), refine (düzenleme), swap ve /d/[code] (paylaşım) hepsi bunu kullanır.
+// Builds the "mechanical" part of a DeckResult from a validated DeckSpec: cards, dust, deckstring, clipboard text, id.
+// Used by pipeline (initial forge), refine (editing), swap and /d/[code] (sharing).
 
 import { getClassInfo, getStandardPool } from "@/lib/cards/repo";
 import type { CardRecord } from "@/lib/cards/types";
@@ -23,7 +23,7 @@ export class AssembleError extends Error {
   }
 }
 
-/** Havuz + lookup; refine ve swap de kullanır. */
+/** Pool + lookup; also used by refine and swap. */
 export async function poolFor(classSlug: string) {
   if (!isClassSlug(classSlug)) throw new AssembleError(`Unknown class: ${classSlug}`);
   const pool = await getStandardPool(classSlug);

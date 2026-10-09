@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// Bilinen geçerli bir Standard Shaman kodu (base64url). Kart verisi (data/) gerektirir: npm run sync:cards
+// A known valid Standard Shaman code (base64url). Requires card data (data/): npm run sync:cards
 const CODE = "AAECAaoIBKiKBNC_B4LUB6iBCA39nwTTngbt5gbo_AbChwfQnQfLrQexsAfOuwePvgfDwAfJwAfJ2wcAAA";
 
 test("landing renders prompt box and class chips", async ({ page }) => {

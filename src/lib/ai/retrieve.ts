@@ -1,6 +1,6 @@
-// Aday havuzu: sınıf + nötr + dual kartların tamamı (Standard'da ~380 kart, ~10k token → hepsi gider).
-// Burada yapılan iş: seed kartları isimden bulmak, kartları ilgi puanına göre sıralamak (seed'ler en üstte),
-// kısıtlara göre elemek (noLegendaries, mustExclude) ve LLM'e giden compact bloğu üretmek.
+// Candidate pool: all class + neutral + dual cards (~380 cards in Standard, ~10k tokens → all are sent).
+// Work done here: resolve seed cards by name, sort cards by relevance score (seeds on top),
+// filter by constraints (noLegendaries, mustExclude) and produce the compact block sent to the LLM.
 
 import { toCompactBlock } from "@/lib/cards/compact";
 import type { CardRecord } from "@/lib/cards/types";
@@ -15,7 +15,7 @@ export interface RetrievedCard {
 const norm = (s: string) =>
   s.toLowerCase().replace(/[’'`,.!:\-]/g, "").replace(/\s+/g, " ").trim();
 
-/** İsimle kart bulma: tam eşleşme > başlangıç > içerme. */
+/** Find a card by name: exact match > prefix > contains. */
 export function findCardByName(name: string, pool: CardRecord[]): CardRecord | undefined {
   const n = norm(name);
   if (!n) return undefined;
@@ -25,15 +25,15 @@ export function findCardByName(name: string, pool: CardRecord[]): CardRecord | u
     pool.find((c) => norm(c.name).includes(n)) ??
     pool.find((c) => n.includes(norm(c.name)) && norm(c.name).length > 5);
   if (direct) return direct;
-  // LLM ismi "eski/uzun" haliyle verebilir ("Al'Akir the Windlord" ↔ "Al'Akir, Lord of Storms"):
-  // kelime öneklerini kısaltarak tek bir başlangıç eşleşmesi ara (en az 4 karakter, "the/of" gibi kısa kelimeler hariç).
+  // The LLM may give the "old/long" form of the name ("Al'Akir the Windlord" ↔ "Al'Akir, Lord of Storms"):
+  // shorten word prefixes and look for a single prefix match (min 4 chars, short words like "the/of" excluded).
   const words = n.split(" ").filter((w) => w.length > 0);
   for (let k = words.length - 1; k >= 1; k--) {
     const prefix = words.slice(0, k).join(" ");
     if (prefix.length < 4) break;
     const hits = pool.filter((c) => norm(c.name).startsWith(prefix));
     if (hits.length === 1) return hits[0];
-    if (hits.length > 1) return undefined; // belirsiz; yanlış kartı seçmektense bulamadı de
+    if (hits.length > 1) return undefined; // ambiguous; better to report not found than pick the wrong card
   }
   return undefined;
 }
@@ -63,10 +63,10 @@ export function retrieveCandidates(intent: Intent, pool: CardRecord[]) {
     intent.mustExclude.map((n) => findCardByName(n, pool)?.dbfId).filter((x): x is number => x !== undefined),
   );
 
-  // Seed kartların etiket kümesi: tribe/keyword/school/metin anahtarları
+  // Tag set of the seed cards: tribe/keyword/school/text keys
   const seedTokens = new Set<string>();
   for (const s of seeds) for (const t of tokensOf(s)) seedTokens.add(t);
-  // Seed bir tribe üyesiyse "mentions:tribe" ile, tribe'dan bahsediyorsa üyeleriyle eşleşsin
+  // If the seed is a tribe member, match "mentions:tribe"; if it mentions a tribe, match its members
   for (const t of Array.from(seedTokens)) {
     if (t.startsWith("tribe:")) seedTokens.add(`mentions:${t.slice(6)}`);
     if (t.startsWith("mentions:")) seedTokens.add(`tribe:${t.slice(9)}`);
@@ -88,7 +88,7 @@ export function retrieveCandidates(intent: Intent, pool: CardRecord[]) {
     if (overlap) { score += Math.min(overlap, 4) * 5; reasons.push(`synergy:${overlap}`); }
     if (focusTribe && (toks.has(`tribe:${focusTribe}`) || toks.has(`mentions:${focusTribe}`))) { score += 15; reasons.push(`tribe:${focusTribe}`); }
     if (focusKw && (toks.has(`kw:${focusKw}`) || toks.has(`mentions:${focusKw}`))) { score += 15; reasons.push(`kw:${focusKw}`); }
-    if (card.classSlug !== "neutral") score += 2; // sınıf kartları hafif önde
+    if (card.classSlug !== "neutral") score += 2; // class cards slightly ahead
     if (intent.archetype === "aggro" && card.cost <= 3) score += 3;
     if (intent.archetype === "control" && (toks.has("mentions:armor") || toks.has("mentions:heal") || card.cost >= 6)) score += 3;
     scored.push({ card, score, reasons });

@@ -1,4 +1,4 @@
-// Blizzard Hearthstone Game Data API için tipli istemci. Blizzard'a yalnızca buradan çıkılır.
+// Typed client for the Blizzard Hearthstone Game Data API. All Blizzard requests go through here.
 
 import { getAccessToken } from "./auth";
 import type {
@@ -45,7 +45,7 @@ function buildUrl(path: string, query: Query) {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Yetkili GET. 401'de token'ı bir kez yeniler, 429'da Retry-After kadar bekleyip bir kez tekrar dener. */
+/** Authorized GET. Refreshes the token once on 401; on 429 waits Retry-After and retries once. */
 export async function blizzardGet<T>(path: string, query: Query = {}, attempt = 0): Promise<T> {
   const url = buildUrl(path, query);
   const token = await getAccessToken({ force: attempt > 0 });
@@ -79,7 +79,7 @@ export const blizzard = {
   searchCards: (params: CardSearchParams) =>
     blizzardGet<CardSearchResponse>("/cards", params as Query),
 
-  /** Tüm sayfaları gezer; `onPage` ile ilerleme raporlanabilir. */
+  /** Walks all pages; progress can be reported via `onPage`. */
   async searchAllCards(
     params: Omit<CardSearchParams, "page">,
     onPage?: (page: number, pageCount: number, got: number) => void,

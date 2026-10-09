@@ -1,5 +1,5 @@
-// Teşhis: Blizzard API'nin verdiği dbfId'ler HearthstoneJSON (oyun verisinden üretilir) ile uyuşuyor mu?
-// Çalıştırma: npm run check:ids   → data/id-report.json + özet
+// Diagnostics: do the dbfIds returned by the Blizzard API match HearthstoneJSON (generated from game data)?
+// Run: npm run check:ids   → data/id-report.json + summary
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { CardDataset } from "../src/lib/cards/types";
@@ -9,7 +9,7 @@ interface HsjCard { dbfId: number; id: string; name: string; set: string; collec
 async function main() {
   const ds = JSON.parse(await readFile(path.join(process.cwd(), "data/cards.standard.json"), "utf8")) as CardDataset;
   const url = "https://api.hearthstonejson.com/v1/latest/enUS/cards.collectible.json";
-  console.log("→ HearthstoneJSON indiriliyor…");
+  console.log("→ downloading HearthstoneJSON…");
   const hsj = (await (await fetch(url)).json()) as HsjCard[];
   const byId = new Map(hsj.map((c) => [c.dbfId, c]));
   const byName = new Map<string, HsjCard[]>();
@@ -27,18 +27,18 @@ async function main() {
   }
   const bySet = new Map<string, number>();
   for (const m of missing) bySet.set(m.set, (bySet.get(m.set) ?? 0) + 1);
-  console.log(`\nBizim havuz: ${ds.cards.length} kart · HSJSON koleksiyon: ${hsj.length}`);
-  console.log(`HSJSON'da OLMAYAN dbfId: ${missing.length}  → set dağılımı:`, Object.fromEntries(bySet));
-  for (const m of missing.slice(0, 25)) console.log(`  ${m.dbfId} ${m.name} [${m.set}] → alternatif:`, m.alternatives.map((a) => `${a.dbfId}/${a.id}/${a.set}`).join(", ") || "yok");
-  console.log(`Set uyuşmazlığı: ${setMismatch.length}`);
-  for (const m of setMismatch.slice(0, 10)) console.log(`  ${m.dbfId} ${m.name}: biz ${m.ourSet}, HSJSON ${m.hsjSet} (${m.hsjId})`);
-  // HSJSON'daki Core id'leri bizde var mı? (ters yön)
+  console.log(`\nOur pool: ${ds.cards.length} cards · HSJSON collectible: ${hsj.length}`);
+  console.log(`dbfIds MISSING from HSJSON: ${missing.length}  → by set:`, Object.fromEntries(bySet));
+  for (const m of missing.slice(0, 25)) console.log(`  ${m.dbfId} ${m.name} [${m.set}] → alternatives:`, m.alternatives.map((a) => `${a.dbfId}/${a.id}/${a.set}`).join(", ") || "none");
+  console.log(`Set mismatches: ${setMismatch.length}`);
+  for (const m of setMismatch.slice(0, 10)) console.log(`  ${m.dbfId} ${m.name}: ours ${m.ourSet}, HSJSON ${m.hsjSet} (${m.hsjId})`);
+  // Do we have the Core ids from HSJSON? (reverse direction)
   const ourIds = new Set(ds.cards.map((c) => c.dbfId));
   const hsjCore = hsj.filter((c) => c.set === "CORE");
   const coreNotInOurs = hsjCore.filter((c) => !ourIds.has(c.dbfId));
-  console.log(`\nHSJSON CORE: ${hsjCore.length} kart; bizde olmayan: ${coreNotInOurs.length}`);
+  console.log(`\nHSJSON CORE: ${hsjCore.length} cards; missing from ours: ${coreNotInOurs.length}`);
   for (const c of coreNotInOurs.slice(0, 10)) console.log(`  ${c.dbfId} ${c.id} ${c.name}`);
   await writeFile(path.join(process.cwd(), "data/id-report.json"), JSON.stringify({ missing, setMismatch, coreNotInOurs: coreNotInOurs.map((c) => ({ dbfId: c.dbfId, id: c.id, name: c.name })) }, null, 2));
-  console.log("\nrapor: data/id-report.json");
+  console.log("\nreport: data/id-report.json");
 }
 main().catch((e) => { console.error(e); process.exit(1); });

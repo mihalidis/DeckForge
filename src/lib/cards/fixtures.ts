@@ -1,4 +1,4 @@
-// Testler için küçük sahte metadata + kart seti. Gerçek şekli taklit eder; değerler temsilîdir.
+// Small fake metadata + card set for tests. Mimics the real shape; values are illustrative.
 import type { ApiCard, Metadata } from "@/lib/blizzard/types";
 
 export const META: Metadata = {

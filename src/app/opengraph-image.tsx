@@ -1,4 +1,4 @@
-// Ana sayfa sosyal önizlemesi (statik).
+// Home page social preview (static).
 import { ImageResponse } from "next/og";
 
 export const alt = "DeckForge — AI deck builder for Hearthstone";

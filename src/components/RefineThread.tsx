@@ -13,7 +13,7 @@ interface Props {
   onSend: (instruction: string) => void;
 }
 
-/** Tasarım 1e: sohbet balonları + çıkan/giren diff. */
+/** Design 1e: chat bubbles + out/in diff. */
 export const RefineThread = forwardRef<HTMLInputElement, Props>(function RefineThread({ thread, busy, error, onSend }, ref) {
   const [text, setText] = useState("");
   const send = () => { const t = text.trim(); if (t && !busy) { onSend(t); setText(""); } };

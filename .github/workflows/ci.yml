@@ -16,5 +16,5 @@ jobs:
       - run: npm run typecheck
       - run: npx eslint src scripts
       - run: npm test
-      # Build: anahtarsız; prebuild sync'i atlar, data/ yokken de derlenir
+      # Build: no keys; prebuild skips sync, compiles even without data/
       - run: npm run build

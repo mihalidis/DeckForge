@@ -1,6 +1,6 @@
-// GET /api/cron/redeploy — Vercel Cron günde bir çağırır (vercel.json). Deploy Hook'u tetikler;
-// yeni build prebuild'de kart verisini yeniden çeker. Böylece data/ serverless'ta "güncel" kalır.
-// Vercel cron isteklerinde Authorization: Bearer <CRON_SECRET> gönderir.
+// GET /api/cron/redeploy — called once a day by Vercel Cron (vercel.json). Triggers the Deploy Hook;
+// the new build re-fetches card data in prebuild, so data/ stays "fresh" on serverless.
+// Vercel sends Authorization: Bearer <CRON_SECRET> on cron requests.
 
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;

@@ -1,18 +1,18 @@
 ---
 name: faz
-description: docs/ROADMAP.md'den sıradaki tamamlanmamış maddeyi seçip uygular, test eder ve işaretler. "sıradaki faz", "devam et", "/faz" denince kullan.
+description: Picks the next unfinished item from docs/ROADMAP.md, implements it, tests it and marks it done. Use when the user says "next phase", "continue", "/faz" (or in Turkish "sıradaki faz", "devam et").
 ---
 
-# Faz ilerletme
+# Phase progression
 
-1. `docs/ROADMAP.md`'yi oku. İlk `[ ]` maddenin bulunduğu fazı ve maddeyi belirle. Kullanıcı belirli bir madde söylediyse onu al.
-2. Maddeyi uygulamadan önce bağımlı dosyaları oku (`CLAUDE.md` yapı bölümü, ilgili `src/lib/*` dosyaları, `docs/API-NOTLARI.md` gerekiyorsa).
-3. Küçük ve çalışır adımlarla uygula. Doğrulayıcı (`src/lib/deck/validate.ts`) veya deckstring koduna dokunuyorsan önce test yaz.
-4. Doğrula: `npx tsc --noEmit`, ilgili `npx vitest` dosyası; UI işiyse `npm run dev` ve ekran görüntüsü.
-5. Bitince:
-   - `docs/ROADMAP.md`'de maddeyi `[x]` yap.
-   - Kullanıcıya görünen bir değişiklikse `CHANGELOG.md` → `[Yayımlanmamış]`'a tek satır ekle.
-   - Fazın tüm maddeleri bittiyse "Bitti kriteri"ni tek tek kontrol et ve sonucu kullanıcıya raporla.
-6. Bir sonraki maddeyi tek cümleyle söyle, başlamadan onay bekle.
+1. Read `docs/ROADMAP.md`. Identify the phase and item of the first `[ ]` item. If the user named a specific item, take that one.
+2. Before implementing the item, read the files it depends on (the structure section of `CLAUDE.md`, the relevant `src/lib/*` files, `docs/API-NOTES.md` if needed).
+3. Implement in small, working steps. If you touch the validator (`src/lib/deck/validate.ts`) or deckstring code, write tests first.
+4. Verify: `npx tsc --noEmit`, the relevant `npx vitest` file; for UI work, `npm run dev` and a screenshot.
+5. When done:
+   - Mark the item `[x]` in `docs/ROADMAP.md`.
+   - If it is a user-visible change, add a single line to `CHANGELOG.md` → `[Unreleased]`.
+   - If all items of the phase are done, check the "Done criterion" one by one and report the result to the user.
+6. State the next item in one sentence and wait for approval before starting.
 
-Kurallar: Faz sırasını atlama (Faz 3 UI işi, Faz 2 pipeline bitmeden başlamaz). Kapsam dışı (Wild, auth, TR) istek gelirse ROADMAP'in "Sonraki fazlar" bölümüne not düş, şimdi yapma.
+Rules: Don't skip phase order (Phase 3 UI work doesn't start before the Phase 2 pipeline is finished). If an out-of-scope request comes in (Wild, auth, TR), note it in the ROADMAP's "Later phases" section; don't do it now.

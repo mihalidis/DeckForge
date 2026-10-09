@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes } from "react";
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "ghost" | "solid" | "soft"; size?: "sm" | "md" };
 
-/** Pill (999px) buton — tasarımın temel aksiyon biçimi. */
+/** Pill (999px) button — the design's primary action shape. */
 export function Pill({ variant = "ghost", size = "sm", className = "", ...rest }: Props) {
   const base = "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
   const sizes = size === "sm" ? "px-3.5 py-[7px] text-[13px]" : "px-[22px] py-[11px] text-[15px] font-bold";
