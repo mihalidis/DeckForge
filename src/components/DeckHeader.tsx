@@ -33,7 +33,7 @@ export function DeckHeader({ deck, name, onNameChange, onRegenerate, onTweak, on
             value={name}
             onChange={(e) => onNameChange(e.target.value.slice(0, 24))}
             aria-label="Deck name"
-            className="w-full border-0 border-b border-dashed bg-transparent pb-[3px] font-display text-[22px] font-medium leading-tight text-parchment focus:border-accent"
+            className="w-full border-0 border-b border-dashed bg-transparent pb-[3px] font-display text-[22px] font-medium leading-tight text-parchment focus:border-[color-mix(in_srgb,var(--color-accent)_50%,transparent)]"
             style={{ borderBottomColor: "color-mix(in srgb, var(--color-parchment) 20%, transparent)" }}
           />
           <div className="flex flex-wrap gap-1.5">

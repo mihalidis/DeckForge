@@ -44,7 +44,7 @@ export const RefineThread = forwardRef<HTMLInputElement, Props>(function RefineT
         </div>
       )}
       {error && <div className="text-[13px] text-danger">{error}</div>}
-      <div className="flex items-center gap-2.5 rounded-full border border-line bg-ink-raised py-2 pl-[18px] pr-2 focus-within:border-[color-mix(in_srgb,var(--color-accent)_50%,transparent)]">
+      <div className="flex items-center gap-2.5 rounded-full border border-line bg-ink-raised py-2 pl-[18px] pr-2 focus-within:border-[color-mix(in_srgb,var(--color-accent)_35%,transparent)]">
         <input ref={ref} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey} maxLength={300} placeholder={en.result.refinePlaceholder} disabled={busy} className="min-w-0 flex-1 border-0 bg-transparent text-[15px] text-parchment focus-visible:outline-none" />
         <button type="button" onClick={send} disabled={busy || !text.trim()} className="rounded-full px-[18px] py-[9px] text-[13.5px] font-bold text-accent transition-colors hover:bg-accent hover:text-ink disabled:opacity-50" style={{ background: "color-mix(in srgb, var(--color-accent) 14%, transparent)" }}>{en.result.refine}</button>
       </div>

@@ -2,6 +2,10 @@
 
 ## [Yayımlanmamış]
 
+- Tarayıcı sekmesi ikonu artık DeckForge logosu (altın kare, ortada elmas) (2026-10-09).
+
+- Metin alanlarındaki kalın sarı odak çerçevesi kaldırıldı; odak artık kapsayıcının ince, soluk ve yuvarlak kenarlığıyla gösteriliyor (2026-10-09).
+
 - Faz 5: Vercel yapılandırması (prebuild sync, dosya paketleme, günlük cron → redeploy), GitHub Actions CI, Playwright smoke, `/d/[code]` OG görseli (2026-10-09).
 
 - Faz 4: refine sohbeti ve diff, Swap, paylaşım linki `/d/[code]`, IP bazlı istek limiti (2026-10-09).

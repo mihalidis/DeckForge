@@ -23,7 +23,7 @@ export function PromptBox({ value, onChange, classSlug, onClassChange, onForge, 
   };
 
   return (
-    <div className="flex flex-col gap-3.5 rounded-xl border border-line bg-ink-raised px-[18px] pb-3.5 pt-[18px] shadow-[0_20px_60px_rgb(0_0_0/0.35)] focus-within:border-[color-mix(in_srgb,var(--color-accent)_50%,transparent)]">
+    <div className="flex flex-col gap-3.5 rounded-xl border border-line bg-ink-raised px-[18px] pb-3.5 pt-[18px] shadow-[0_20px_60px_rgb(0_0_0/0.35)] focus-within:border-[color-mix(in_srgb,var(--color-accent)_35%,transparent)]">
       <textarea
         ref={ref}
         value={value}
