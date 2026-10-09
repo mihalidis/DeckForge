@@ -26,9 +26,10 @@ async function deckFromCode(code: string) {
 export async function generateMetadata({ params }: PageProps<"/d/[code]">): Promise<Metadata> {
   const { code } = await params;
   const deck = await deckFromCode(code);
-  if (!deck) return { title: "Deck not found — DeckForge" };
+  if (!deck) return { title: "Deck not found", robots: { index: false } };
   return {
-    title: `${deck.name} — DeckForge`,
+    title: deck.name,
+    robots: { index: false }, // paylaşım sayfaları sonsuz; arama motoru dizinine gerek yok
     description: `${deck.className} · ${deck.cardCount} cards · ${deck.dust.toLocaleString("en-US")} dust. Copy the code and paste it into Hearthstone.`,
   };
 }

@@ -92,12 +92,14 @@ Kapsam kararı (Faz 1–5): **yalnızca Standard, kullanıcı hesabı yok, dark 
 ## Faz 5 — Yayın (2–3 gün)
 
 - [x] Vercel yapılandırması: `outputFileTracingIncludes` ile `data/*.json` paketlenir, `prebuild` build'de sync çeker (anahtarsız build de geçer)
-- [ ] Vercel projesini oluştur, env'leri gir, ilk deploy (README → Yayına alma)
+- [x] Vercel projesi: https://deck-forge-eosin.vercel.app (2026-10-09)
 - [x] Vercel Cron (`vercel.json`, 08:20 UTC) → `/api/cron/redeploy` (CRON_SECRET) → Deploy Hook → yeni build taze veriyle; yama günü elle Redeploy
 - [x] Playwright smoke (`e2e/smoke.spec.ts`: landing, `/d/[code]`, API 400) — yerelde/preview'da koşar; CI'da typecheck + lint + vitest + build (`.github/workflows/ci.yml`)
 - [x] `/d/[code]/opengraph-image` dinamik OG görseli (sınıf rengi, ad, dust, mana eğrisi)
-- [ ] Alan adı, favicon, `metadataBase`, basit SEO (robots, sitemap)
-- [ ] `CHANGELOG.md` v0.1.0 + GitHub Release; açık kaynak için LICENSE (MIT?) ve İngilizce README kararı
+- [x] Favicon (`icon.svg`, `apple-icon`), ana sayfa OG görseli, `metadataBase` (`NEXT_PUBLIC_SITE_URL` → Vercel host), robots/sitemap; `/d/[code]` noindex
+- [ ] Alan adı (istersen; `NEXT_PUBLIC_SITE_URL` ile tek satır)
+- [x] `CHANGELOG.md` v0.1.0, MIT `LICENSE`, İngilizce `README.md` (Türkçe README `docs/README.tr.md`)
+- [ ] GitHub Release v0.1.0 (`git tag v0.1.0 && git push --tags`)
 
 **Bitti kriteri:** Herkese açık URL; günlük senkron çalışıyor; CI yeşil.
 

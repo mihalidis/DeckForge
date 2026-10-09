@@ -2,7 +2,7 @@
 
 Next.js 16 (App Router, Turbopack) + TypeScript + Tailwind v4 (CSS-first: token'lar `src/app/globals.css` `@theme` bloğunda, `tailwind.config` yok) (shadcn/ui yok; bileşenler `src/components/` altında elle yazılır). Kullanıcı serbest metinle deste ister, LLM (Vercel AI SDK; varsayılan Gemini Flash ücretsiz katman) kart havuzundan 30 kartlık **geçerli** bir Hearthstone destesi seçer, deck kodu üretilir ve oyuna yapıştırılır. Kart verisi Blizzard Hearthstone Game Data API'den gelir.
 
-Dokümanlar: `docs/FIZIBILITE.md` (neden/nasıl), `docs/ROADMAP.md` (faz planı, tek gerçek kaynak), `docs/API-NOTLARI.md` (Blizzard API + deckstring referansı), `docs/TASARIM-PROMPT.md`.
+Dokümanlar: `README.md` (İngilizce, açık kaynak), `docs/README.tr.md`, `docs/FIZIBILITE.md` (neden/nasıl), `docs/ROADMAP.md` (faz planı, tek gerçek kaynak), `docs/API-NOTLARI.md` (Blizzard API + deckstring referansı), `docs/TASARIM-PROMPT.md`.
 
 ## Komutlar
 

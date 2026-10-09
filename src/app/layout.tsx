@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Spectral, Manrope, JetBrains_Mono } from "next/font/google";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const spectral = Spectral({
@@ -22,9 +23,14 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DeckForge — AI deck builder for Hearthstone",
+  metadataBase: new URL(siteUrl()),
+  title: { default: "DeckForge — AI deck builder for Hearthstone", template: "%s — DeckForge" },
   description:
     "Describe the deck you want to play. Get a legal 30-card Standard deck and a code that pastes straight into Hearthstone.",
+  applicationName: "DeckForge",
+  openGraph: { siteName: "DeckForge", type: "website", locale: "en_US" },
+  twitter: { card: "summary_large_image" },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

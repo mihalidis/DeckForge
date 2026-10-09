@@ -1,50 +1,76 @@
 # DeckForge
 
-Hearthstone için yapay zeka destekli deste üretici. Serbest metinle iste ("Shudderwock etrafında bir Shaman destesi"), geçerli 30 kartlık deste ve oyuna yapıştırılabilir deck kodu al.
+**AI deck builder for Hearthstone.** Describe the deck you want to play — *"Elemental Shaman around Al'Akir"*, *"cheap aggro Hunter under 3000 dust"* — and get a legal 30-card Standard deck with a code that pastes straight into the game.
 
-- Fizibilite: `docs/FIZIBILITE.md`
-- Faz planı: `docs/ROADMAP.md`
-- API referansı: `docs/API-NOTLARI.md`
-- Tasarım: `design/` (prototip `design/export/DeckForge.dc.html`, token'lar `design/tokens.md`)
+Live: https://deck-forge-eosin.vercel.app · Türkçe dokümantasyon: [`docs/`](docs/) ([README](docs/README.tr.md), [feasibility](docs/FIZIBILITE.md), [roadmap](docs/ROADMAP.md))
 
-## Kurulum
+## How it works
+
+1. **Card data** comes from Blizzard's official [Hearthstone Game Data API](https://develop.battle.net/documentation/hearthstone/game-data-apis) and is synced into a local JSON cache (`npm run sync:cards`, and on every production build). Only released Standard sets are used; announced-but-unreleased expansions are filtered out because the game rejects deck codes that contain them.
+2. **The LLM** (Gemini Flash by default via the Vercel AI SDK; Ollama and Anthropic are drop-in alternatives) reads your request, then picks 30 cards from the class's full Standard pool — every card with its real text, so new sets work without retraining anything.
+3. **A deterministic validator** checks size, copy limits, class legality and Death Knight runes. If the model slips, it gets the errors back for up to two repair rounds, then a mechanical repair finishes the job. Invalid decks never reach the UI.
+4. **The deck code** is encoded with [`deckstrings`](https://github.com/hearthsim/hearthstone-deckstrings) and verified against Blizzard's `/deck` endpoint. Copy, open Hearthstone, create a new deck.
+
+Then: refine the deck in a chat ("make it cheaper"), apply suggested swaps, or share it with a link (`/d/<code>`) that needs no database.
+
+## Stack
+
+Next.js 16 (App Router, Cache Components) · TypeScript · Tailwind v4 · Vercel AI SDK · `deckstrings` · Vitest · Playwright
+
+## Run it locally
 
 ```bash
-cp .env.example .env.local   # Blizzard + Gemini anahtarlarını doldur
+git clone https://github.com/<you>/deckforge && cd deckforge
 npm install
-npm run dev                  # http://localhost:3000
+cp .env.example .env.local      # fill in the keys below
+npm run sync:cards              # pulls ~1,200 Standard cards from Blizzard (≈10 s)
+npm run dev                     # http://localhost:3000
 ```
 
-## Komutlar
+You need two free keys:
 
-| Komut | Ne yapar |
+- **Blizzard** — create a client at [develop.battle.net](https://develop.battle.net) → `BLIZZARD_CLIENT_ID`, `BLIZZARD_CLIENT_SECRET`.
+- **Gemini** — [aistudio.google.com](https://aistudio.google.com) → `GOOGLE_GENERATIVE_AI_API_KEY`. The free tier is enough for development (quota is per model and resets daily; the app shows a "forge is busy" state when it runs out). Set `LLM_PROVIDER=ollama` to run fully local, or `anthropic` to use Claude.
+
+`npm run llm:check` verifies the key and model names; `npm run eval -- --limit 3` builds a few real decks and reports legality, seed-card inclusion and timing.
+
+## Scripts
+
+| Script | What it does |
 |---|---|
-| `npm run dev` | Geliştirme sunucusu |
+| `npm run dev` / `build` / `start` | Next.js |
+| `npm run sync:cards` | Fetch metadata + Standard cards into `data/` |
+| `npm run check:ids` | Cross-check card ids against HearthstoneJSON (diagnostics) |
+| `npm run llm:check` | Verify LLM key and model ids |
+| `npm run eval [-- --limit N]` | Evaluation set of 30 prompts (uses LLM quota) |
+| `npm test` / `npm run e2e` | Vitest unit tests / Playwright smoke tests |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm test` | Vitest |
-| `npm run sync:cards` | Blizzard'dan metadata + Standard kartları `data/` altına çeker (Faz 1) |
-| `npm run eval` | 30 prompt'luk deste değerlendirme seti (`-- --limit 3`); ücretsiz Gemini kotasını yer |
-| `npm run llm:check` | LLM anahtarı ve model adlarını doğrular |
-| `npm run e2e` | Playwright smoke |
 
-## Yayına alma (Vercel, ücretsiz plan)
+## Deploy (Vercel, free plan)
 
-Kart verisi (`data/*.json`) repoda değil; her build'de `prebuild` adımı Blizzard'dan çeker ve dosyalar sunucu fonksiyonlarına paketlenir. Günlük tazeleme için Vercel Cron her sabah bir Deploy Hook tetikler.
+Card data is not committed; `prebuild` fetches it on every build and `next.config.ts` bundles `data/*.json` into the server functions. A daily cron (`vercel.json`) calls `/api/cron/redeploy`, which triggers a Deploy Hook so the data stays fresh.
 
-1. Repoyu Vercel'e bağla (Import Project). Framework: Next.js, komutlar varsayılan.
-2. Environment Variables: `BLIZZARD_CLIENT_ID`, `BLIZZARD_CLIENT_SECRET`, `BLIZZARD_REGION`, `LLM_PROVIDER`, `GOOGLE_GENERATIVE_AI_API_KEY`, `LLM_MODEL_*`, `LLM_THINKING_*` (hepsi `.env.example`'da).
-3. Settings → Git → Deploy Hooks → "daily-sync" adında hook oluştur, URL'yi `VERCEL_DEPLOY_HOOK_URL` olarak ekle.
-4. `CRON_SECRET` ekle (rastgele uzun bir dize). `vercel.json`'daki cron (`20 8 * * *` UTC ≈ TR 11:20, Gemini kotası sıfırlandıktan sonra) `/api/cron/redeploy`'u bu secret ile çağırır.
-5. Deploy. İlk build'de loglarda `→ metadata çekiliyor…` satırını gör; `/api/cards?q=alakir` ile veriyi doğrula.
+1. Import the repo in Vercel. Add the env vars from `.env.example`.
+2. Settings → Git → Deploy Hooks → create one, put its URL in `VERCEL_DEPLOY_HOOK_URL`; add a random `CRON_SECRET`.
+3. Optional: `NEXT_PUBLIC_SITE_URL` for a custom domain (used for OG images and the sitemap).
 
-Yama günü elle tazeleme: Vercel'de "Redeploy" ya da hook URL'sine `POST`.
+## Project layout
 
-## Testler
+```
+src/lib/blizzard   token + typed client for the Blizzard API
+src/lib/cards      sync normalisation, local repo, compact format for the LLM
+src/lib/deck       rules, validator, deckstring, assemble, pipeline
+src/lib/ai         provider selection, intent, retrieve, build, refine, repair
+src/app            pages, /api/forge (SSE), /api/refine, /api/deck, /d/[code]
+scripts            sync-cards, eval, llm-check, check-ids, prebuild
+docs               Turkish planning docs (feasibility, roadmap, API notes)
+design             Claude Design export, tokens and screen map
+```
 
-- `npm test` — birim (Vitest)
-- `npm run e2e` — Playwright smoke (landing, `/d/[code]`, API); `npm run sync:cards` sonrası, LLM'e gitmez. İlk kez: `npx playwright install chromium`
-- CI (`.github/workflows/ci.yml`): typecheck + lint + test + build
+## Contributing
 
-Yığın: Next.js 16 (App Router, Turbopack) · TypeScript · Tailwind v4 (CSS-first, token'lar `src/app/globals.css` `@theme` bloğunda) · Vercel AI SDK + Gemini · `deckstrings`.
+Issues and PRs are welcome. The rules the code follows are in [`CLAUDE.md`](CLAUDE.md) (in Turkish; the gist: never hand-write set/class lists, never show an unvalidated deck, no hex colours in JSX, all LLM calls go through `src/lib/ai/provider.ts`).
 
-Bu proje Blizzard Entertainment ile bağlantılı değildir. Hearthstone, Blizzard Entertainment'ın tescilli markasıdır.
+## License & disclaimer
+
+MIT — see [LICENSE](LICENSE). DeckForge is a fan project and is not affiliated with Blizzard Entertainment. Hearthstone is a trademark of Blizzard Entertainment, Inc. Card data and images are © Blizzard Entertainment and are used under the [Blizzard Developer API Terms](https://develop.battle.net/documentation/guides/getting-started) and [Fan Content Policy](https://www.blizzard.com/en-us/legal/fan-content-policy).
