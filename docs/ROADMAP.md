@@ -56,7 +56,7 @@ Kapsam kararı (Faz 1–5): **yalnızca Standard, kullanıcı hesabı yok, dark 
 - [x] `npm run llm:check` → anahtar ve model adları doğrulandı
 - [x] İlk gerçek desteler: 8/8 yasal + Blizzard doğrulamalı (Al'Akir Elemental, Budget Hunter, Armor Warrior, Murloc Paladin…), 15–35 sn
 - [ ] Tam 30'luk eval — ücretsiz Gemini kotası günde ~20 deste; **karar: ücretsiz kalınacak**, eval günlere bölünerek koşulur (`--limit`), `busy` görünce kendini durdurur
-- [x] Oyunda elle test: UI'dan kopyalanan kod Hearthstone'da açıldı (2026-10-09)
+- [x] Oyunda elle test: ilk kodlar oyun tarafından reddedildi → sebep yaklaşan setin (`hyped`) kartları; sync'te hariç tutuldu, kod oyunda açıldı (2026-10-09)
 
 **Bitti kriteri:** Eval setinde geçerli deste oranı %100 (doğrulayıcı sayesinde), seed kart dahil oranı ≥%95, ortalama süre <20 sn. Üretilen kodlar oyunda açılıyor (elle 5 deste test).
 
