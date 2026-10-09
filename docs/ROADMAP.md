@@ -56,7 +56,7 @@ Kapsam kararı (Faz 1–5): **yalnızca Standard, kullanıcı hesabı yok, dark 
 - [x] `npm run llm:check` → anahtar ve model adları doğrulandı
 - [x] İlk gerçek desteler: 8/8 yasal + Blizzard doğrulamalı (Al'Akir Elemental, Budget Hunter, Armor Warrior, Murloc Paladin…), 15–35 sn
 - [ ] Tam 30'luk eval — ücretsiz Gemini kotası günde ~20 deste; **karar: ücretsiz kalınacak**, eval günlere bölünerek koşulur (`--limit`), `busy` görünce kendini durdurur
-- [ ] Üretilen 5 kodu oyunda elle test et (`data/eval-*.json` içindeki desteleri `/api/forge` ile tekrar üretmeye gerek yok; pano metni UI'dan kopyalanacak)
+- [x] Oyunda elle test: UI'dan kopyalanan kod Hearthstone'da açıldı (2026-10-09)
 
 **Bitti kriteri:** Eval setinde geçerli deste oranı %100 (doğrulayıcı sayesinde), seed kart dahil oranı ≥%95, ortalama süre <20 sn. Üretilen kodlar oyunda açılıyor (elle 5 deste test).
 
@@ -71,27 +71,30 @@ Kapsam kararı (Faz 1–5): **yalnızca Standard, kullanıcı hesabı yok, dark 
 - [x] `WhyPanel` accordion (game plan, synergy, mulligan, swaps — Swap butonu Faz 4)
 - [x] `ErrorCard`: vague (örnek chip'leri), rotated, api, busy, llm, invalid
 - [x] Mobil: tek sütun, `StickyCopyBar`; hover önizleme yalnız masaüstü
-- [ ] Tarayıcıda gerçek deste ile gözden geçirme (masaüstü + 390px), tasarımla fark listesi
+- [x] Tarayıcıda gerçek deste ile gözden geçirildi; kopyalama için execCommand yedeği eklendi (2026-10-09)
 - [x] `Navbar`, `Footer` (sorumluluk reddi)
 
 **Bitti kriteri:** Prompt → deste → kopyala → oyunda yapıştır akışı masaüstü ve mobilde çalışıyor; Lighthouse erişilebilirlik ≥90.
 
 ## Faz 4 — İyileştirme / refine (3–4 gün)
 
-- [ ] Takip prompt'u ("make it cheaper", "remove X"): mevcut deste bağlam olarak gönderilir, diff (çıkan/giren) gösterilir
-- [ ] "Swap" butonu: tek kart değişimi, yeniden doğrulama ve yeni kod
-- [ ] İstek başına limit (IP bazlı, Upstash/Vercel KV) ve basit kötüye kullanım koruması
-- [ ] Hata izleme (Sentry) ve ürün analitiği (PostHog): `forge_started`, `forge_succeeded`, `code_copied`
-- [ ] Deste paylaşım linki (`/d/[code]` — kodu URL'den çözer, sunucu tarafında Blizzard ile genişletir, DB gerekmez)
+- [x] Refine: `POST /api/refine` (LLM düzenler → validate/mekanik onarım → encode), `RefineThread` balonlar + çıkan/giren diff + dust farkı, geçmiş bağlam olarak gider
+- [x] Swap: `POST /api/deck` (LLM yok; doğrula + kodla), WhyPanel'de uygulanınca "Swapped", thread'e diff düşer
+- [x] İstek limiti: bellek içi IP bazlı (`RATE_LIMIT_FORGE`, varsayılan 8 / 10 dk) forge + refine; Upstash gerekirse Faz 5
+- [ ] Hata izleme (Sentry) ve ürün analitiği (PostHog) — opsiyonel, ücretsiz katmanlar; açık kaynak için env ile kapalı varsayılan
+- [x] Paylaşım: `/d/[code]` (base64url deckstring → yerel veriyle kurulur, DB/LLM yok, OG başlık/açıklama), Share butonu linki kopyalar
+- [ ] `generateObject` → `generateText + Output.object` geçişi (AI SDK deprecation)
 
 **Bitti kriteri:** Refine akışı eval setinin 10 örneğinde çalışıyor; paylaşım linki sosyal önizleme (OG image) üretiyor.
+
+**Durum (2026-10-09):** Kod tamam, build ve 33 test yeşil; refine'ın gerçek LLM ile denenmesi ve OG görseli (Faz 5'e taşındı) kaldı.
 
 ## Faz 5 — Yayın (2–3 gün)
 
 - [ ] Vercel projesi, env secret'ları, `eu` bölgesi
 - [ ] Vercel Cron: günlük `sync:cards`; yama günleri için manuel tetik ucu (`/api/admin/sync`, gizli token)
 - [ ] Playwright: ana akış smoke testi, CI'da (GitHub Actions)
-- [ ] Alan adı, OG görselleri, favicon, basit SEO
+- [ ] Alan adı, OG görselleri (`/d/[code]` için dinamik `opengraph-image`), favicon, basit SEO
 - [ ] `CHANGELOG.md` v0.1.0
 
 **Bitti kriteri:** Herkese açık URL; günlük senkron çalışıyor; CI yeşil.

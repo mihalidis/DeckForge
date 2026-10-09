@@ -2,12 +2,33 @@
 import { useEffect, useRef, useState } from "react";
 import { en } from "@/i18n/en";
 
+/** navigator.clipboard yoksa (http://192.168… gibi güvensiz bağlam) gizli textarea + execCommand ile kopyalar. */
+function legacyCopy(text: string): boolean {
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
 export function useCopy(text: string) {
   const [copied, setCopied] = useState(false);
   const t = useRef<number | null>(null);
   useEffect(() => () => { if (t.current) window.clearTimeout(t.current); }, []);
   const copy = async () => {
-    try { await navigator.clipboard.writeText(text); } catch { /* izin yok; yine de geri bildirim ver */ }
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; } catch { /* HTTPS dışı / izin yok → eski yöntem */ }
+    if (!ok) ok = legacyCopy(text);
+    if (!ok) { window.prompt("Copy the deck code manually:", text); return; }
     setCopied(true);
     if (t.current) window.clearTimeout(t.current);
     t.current = window.setTimeout(() => setCopied(false), 2200);

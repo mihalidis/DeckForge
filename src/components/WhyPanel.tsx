@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import { en } from "@/i18n/en";
-import type { DeckResult } from "@/lib/deck/types";
+import type { DeckResult, Swap } from "@/lib/deck/types";
 
-export function WhyPanel({ deck }: { deck: DeckResult }) {
+export function WhyPanel({ deck, onSwap, applied, busy }: { deck: DeckResult; onSwap?: (sw: Swap) => void; applied?: Set<number>; busy?: boolean }) {
   const [open, setOpen] = useState<Record<string, boolean>>({ plan: true, syn: true, mull: false, swaps: true });
   return (
     <div className="flex min-w-0 flex-col gap-3.5">
@@ -33,7 +33,11 @@ export function WhyPanel({ deck }: { deck: DeckResult }) {
                     </div>
                     <span className="text-subtle">→</span>
                     <div className="text-sm font-semibold">{sw.in.name}</div>
-                    <button type="button" disabled title="Coming soon" className="rounded-full border border-line px-3.5 py-1.5 text-[12.5px] font-bold text-parchment disabled:opacity-50">{en.result.swap}</button>
+                    {applied?.has(sw.out.dbfId) ? (
+                      <span className="rounded-full px-3.5 py-1.5 text-[12.5px] font-bold text-success">{en.result.swapped}</span>
+                    ) : (
+                      <button type="button" onClick={() => onSwap?.(sw)} disabled={!onSwap || busy} className="rounded-full border border-line px-3.5 py-1.5 text-[12.5px] font-bold text-parchment hover:border-accent disabled:opacity-50">{en.result.swap}</button>
+                    )}
                   </div>
                 ))}
               </div>

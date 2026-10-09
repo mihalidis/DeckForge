@@ -43,6 +43,9 @@ export interface DeckResult {
   verifiedByBlizzard: boolean;
 }
 
+/** DeckResult'ın LLM açıklamaları olmayan mekanik kısmı (assemble, /api/deck, /d/[code]). */
+export type DeckCore = Pick<DeckResult, "id" | "name" | "classSlug" | "className" | "format" | "archetype" | "cards" | "cardCount" | "dust" | "deckstring" | "clipboardText">;
+
 export type ValidationCode =
   | "SIZE"
   | "COPIES"

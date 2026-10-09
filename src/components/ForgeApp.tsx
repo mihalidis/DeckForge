@@ -11,7 +11,11 @@ import { FeatureCards } from "./FeatureCards";
 import { Footer } from "./Footer";
 import { Navbar } from "./Navbar";
 import { PromptBox } from "./PromptBox";
-import { RefineBox } from "./RefineBox";
+import { RefineThread, type ThreadEntry } from "./RefineThread";
+import { diffDecks, toUrlCode } from "@/lib/deck/share";
+import type { DeckCore } from "@/lib/deck/types";
+import type { DeckDiff } from "@/lib/deck/share";
+import type { Swap } from "@/lib/deck/types";
 import { StepTracker } from "./StepTracker";
 import { StickyCopyBar } from "./StickyCopyBar";
 import { WhyPanel } from "./WhyPanel";
@@ -21,12 +25,74 @@ export function ForgeApp() {
   const [classSlug, setClassSlug] = useState<ClassSlug | null>(null);
   const [deckName, setDeckName] = useState("");
   const [view, setView] = useState<"list" | "grid">("list");
-  const { phase, steps, deck, error, elapsedMs, forge, cancel, reset } = useForge();
+  const { phase, steps, deck, error, elapsedMs, forge, cancel, reset, setDeck } = useForge();
   const refineRef = useRef<HTMLInputElement>(null);
+  const [thread, setThread] = useState<ThreadEntry[]>([]);
+  const [refining, setRefining] = useState(false);
+  const [refineError, setRefineError] = useState<string | null>(null);
+  const [applied, setApplied] = useState<Set<number>>(new Set());
+  const [shareLabel, setShareLabel] = useState<string | undefined>(undefined);
+
+  const applyCore = (core: DeckCore) => {
+    if (!deck) return;
+    setDeck({ ...deck, ...core, name: deckName || core.name, verifiedByBlizzard: false });
+  };
+
+  const sendRefine = async (instruction: string) => {
+    if (!deck) return;
+    setRefining(true); setRefineError(null);
+    try {
+      const res = await fetch("/api/refine", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ classSlug: deck.classSlug, name: deckName || deck.name, archetype: deck.archetype, cards: deck.cards.map((c) => ({ dbfId: c.dbfId, count: c.count })), instruction, history: thread.map((t) => ({ user: t.user, reply: t.reply })) }),
+      });
+      const j = (await res.json()) as { reply: string; deck: DeckCore; diff: DeckDiff } | { kind: string; message: string };
+      if (!res.ok || !("deck" in j)) throw new Error("message" in j ? j.message : `HTTP ${res.status}`);
+      applyCore(j.deck);
+      setThread((t) => [...t, { user: instruction, reply: j.reply, diff: j.diff }]);
+    } catch (e) {
+      setRefineError((e as Error).message);
+    } finally {
+      setRefining(false);
+    }
+  };
+
+  const applySwap = async (sw: Swap) => {
+    if (!deck) return;
+    setRefining(true); setRefineError(null);
+    try {
+      // Legendary gelen kart 1 kopya olabilir; o zaman çıkanın yalnızca 1 kopyası çıkar ki toplam 30 kalsın.
+      const inCount = sw.in.rarity === "legendary" ? 1 : sw.out.count;
+      const cards: { dbfId: number; count: number }[] = deck.cards
+        .map((c) => ({ dbfId: c.dbfId, count: c.dbfId === sw.out.dbfId ? c.count - inCount : c.count }))
+        .filter((c) => c.count > 0);
+      const existing = cards.find((c) => c.dbfId === sw.in.dbfId);
+      if (existing) existing.count = Math.min(2, existing.count + inCount); else cards.push({ dbfId: sw.in.dbfId, count: inCount });
+      const res = await fetch("/api/deck", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ classSlug: deck.classSlug, name: deckName || deck.name, archetype: deck.archetype, cards }) });
+      const j = (await res.json()) as DeckCore | { kind: string; message: string };
+      if (!res.ok || !("deckstring" in j)) throw new Error("message" in j ? j.message : `HTTP ${res.status}`);
+      const before = deck.cards;
+      applyCore(j);
+      setApplied((a) => new Set(a).add(sw.out.dbfId));
+      setThread((t) => [...t, { user: `Swap ${sw.out.name} → ${sw.in.name}`, reply: sw.why, diff: diffDecks(before, j.cards) }]);
+    } catch (e) {
+      setRefineError((e as Error).message);
+    } finally {
+      setRefining(false);
+    }
+  };
+
+  const share = async () => {
+    if (!deck) return;
+    const url = `${window.location.origin}/d/${toUrlCode(deck.deckstring)}`;
+    try { await navigator.clipboard.writeText(url); } catch { window.prompt("Share link:", url); return; }
+    setShareLabel(en.result.linkCopied);
+    window.setTimeout(() => setShareLabel(undefined), 2000);
+  };
 
   // Sınıf chip'i prompt'a eklenir ki LLM niyeti kesin okusun; chip yoksa prompt olduğu gibi gider.
   const fullPrompt = () => (classSlug && !prompt.toLowerCase().includes(classSlug) ? `${prompt.trim()} (class: ${classSlug})` : prompt.trim());
-  const run = () => { if (prompt.trim()) { setDeckName(""); void forge(fullPrompt()); } };
+  const run = () => { if (prompt.trim()) { setDeckName(""); setThread([]); setApplied(new Set()); setRefineError(null); void forge(fullPrompt()); } };
   const goHome = () => { reset(); window.scrollTo({ top: 0 }); };
   const classColor = classSlug ? CLASS_COLOR_VAR[classSlug] : deck ? CLASS_COLOR_VAR[deck.classSlug as ClassSlug] : undefined;
 
@@ -67,11 +133,11 @@ export function ForgeApp() {
         {phase === "result" && deck && (
           <section className="mt-5 grid items-start gap-6 lg:[grid-template-areas:'head_cards'_'head_why'_'head_thread'] lg:[grid-template-columns:minmax(300px,340px)_minmax(0,1fr)]">
             <div className="lg:[grid-area:head]">
-              <DeckHeader deck={deck} name={deckName || deck.name} onNameChange={setDeckName} onRegenerate={run} onTweak={() => refineRef.current?.focus()} />
+              <DeckHeader deck={deck} name={deckName || deck.name} onNameChange={setDeckName} onRegenerate={run} onTweak={() => refineRef.current?.focus()} onShare={share} shareLabel={shareLabel} />
             </div>
             <div className="lg:[grid-area:cards]"><CardList cards={deck.cards} classSlug={deck.classSlug} view={view} onView={setView} /></div>
-            <div className="lg:[grid-area:why]"><WhyPanel deck={deck} /></div>
-            <div className="lg:[grid-area:thread]"><RefineBox ref={refineRef} /></div>
+            <div className="lg:[grid-area:why]"><WhyPanel deck={deck} onSwap={applySwap} applied={applied} busy={refining} /></div>
+            <div className="lg:[grid-area:thread]"><RefineThread ref={refineRef} thread={thread} busy={refining} error={refineError} onSend={sendRefine} /></div>
             <StickyCopyBar deck={deck} />
           </section>
         )}

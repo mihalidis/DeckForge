@@ -2,6 +2,8 @@
 
 ## [Yayımlanmamış]
 
+- Faz 4: refine sohbeti ve diff, Swap, paylaşım linki `/d/[code]`, IP bazlı istek limiti (2026-10-09).
+
 - Faz 3: arayüz — landing, adım izleyici, deste sonucu (sidebar), kart listesi/grid, "why" paneli, hata kartları, mobil sticky kopyala (2026-10-08).
 
 - Faz 2: deste motoru — doğrulayıcı, deckstring, Gemini ile intent/build/repair, `forgeDeck()` pipeline, `/api/forge` SSE, eval seti (2026-10-08).

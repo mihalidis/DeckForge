@@ -2,7 +2,7 @@
 // Her adım onStep ile raporlanır; UI'daki adım izleyici bu olayları dinler.
 
 import { blizzard } from "@/lib/blizzard/client";
-import { getClassInfo, getStandardPool, loadDataset } from "@/lib/cards/repo";
+import { getStandardPool, loadDataset } from "@/lib/cards/repo";
 import type { CardRecord } from "@/lib/cards/types";
 import { buildDeck, repairDeck, type BuildContext } from "@/lib/ai/build";
 import { parseIntent } from "@/lib/ai/intent";
@@ -10,9 +10,9 @@ import { mechanicalRepair } from "@/lib/ai/repair";
 import { findCardByName, retrieveCandidates } from "@/lib/ai/retrieve";
 import { isQuotaError, isTransientLlmError } from "@/lib/ai/provider";
 import type { Intent } from "@/lib/ai/schemas";
-import { encodeDeck, shortIdOf, toClipboardText } from "./deckstring";
+import { assembleDeck } from "./assemble";
 import { CLASS_NAMES, isClassSlug, type ClassSlug } from "./rules";
-import type { DeckCard, DeckResult, DeckSpec, Swap } from "./types";
+import type { DeckResult, DeckSpec, Swap } from "./types";
 import { formatErrors, validateDeck } from "./validate";
 
 export type StepId = "intent" | "retrieve" | "build" | "validate" | "encode";
@@ -133,16 +133,8 @@ export async function forgeDeck(userPrompt: string, opts: ForgeOptions = {}): Pr
 
   // 5) encode
   emit({ step: "encode", status: "start" });
-  const cls = await getClassInfo(classSlug);
-  if (!cls?.heroDbfId) throw new ForgeError("api", `No hero id for ${classSlug} in metadata`);
-  const deckstring = encodeDeck({ format: "standard", heroDbfId: cls.heroDbfId, cards: spec.cards });
-
-  const cards: DeckCard[] = spec.cards
-    .map((e) => ({ ...lookup(e.dbfId)!, count: e.count as 1 | 2 }))
-    .sort((a, b) => a.cost - b.cost || a.name.localeCompare(b.name));
-  const dust = cards.reduce((s, c) => s + c.dust * c.count, 0);
-  const className = CLASS_NAMES[classSlug];
-  const name = (built.name || `${intent.archetype} ${className}`).slice(0, 24);
+  const core = await assembleDeck({ spec, name: built.name, archetype: built.archetype });
+  const { cards, deckstring } = core;
 
   let verified = false;
   if (opts.verifyWithBlizzard ?? true) {
@@ -167,17 +159,7 @@ export async function forgeDeck(userPrompt: string, opts: ForgeOptions = {}): Pr
     .filter((s): s is Swap => !!s);
 
   return {
-    id: shortIdOf(deckstring),
-    name,
-    classSlug,
-    className,
-    format: "standard",
-    archetype: built.archetype,
-    cards,
-    cardCount: 30,
-    dust,
-    deckstring,
-    clipboardText: toClipboardText({ deckName: name, className, format: "standard", deckstring, cards }),
+    ...core,
     sections: [
       { id: "plan", title: "Game plan", paras: built.gamePlan },
       { id: "syn", title: "Core synergy", paras: [built.coreSynergy] },

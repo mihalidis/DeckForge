@@ -11,12 +11,14 @@ interface Props {
   deck: DeckResult;
   name: string;
   onNameChange: (n: string) => void;
-  onRegenerate: () => void;
-  onTweak: () => void;
+  onRegenerate?: () => void;
+  onTweak?: () => void;
+  onShare?: () => void;
+  shareLabel?: string;
 }
 
 /** Tasarım 1c: sol sabit panel. Mobilde akışta kalır; kopyala butonu ayrıca StickyCopyBar'da. */
-export function DeckHeader({ deck, name, onNameChange, onRegenerate, onTweak }: Props) {
+export function DeckHeader({ deck, name, onNameChange, onRegenerate, onTweak, onShare, shareLabel }: Props) {
   const color = CLASS_COLOR_VAR[deck.classSlug as ClassSlug];
   const avg = (deck.cards.reduce((s, c) => s + c.cost * c.count, 0) / deck.cardCount).toFixed(1);
   const { copied, copy } = useCopy(deck.clipboardText);
@@ -36,7 +38,9 @@ export function DeckHeader({ deck, name, onNameChange, onRegenerate, onTweak }: 
           />
           <div className="flex flex-wrap gap-1.5">
             <span className="rounded-full border border-line-hover px-[9px] py-[3px] text-[11px] uppercase tracking-[.06em] text-muted">{en.result.standard}</span>
-            <span className="rounded-full px-[9px] py-[3px] text-[11px] uppercase tracking-[.06em] text-archetype" style={{ background: tint("var(--color-class-shaman)", 18) }}>{deck.archetype}</span>
+            {deck.archetype !== "unspecified" && (
+              <span className="rounded-full px-[9px] py-[3px] text-[11px] uppercase tracking-[.06em] text-archetype" style={{ background: tint("var(--color-class-shaman)", 18) }}>{deck.archetype}</span>
+            )}
           </div>
         </div>
       </div>
@@ -69,9 +73,9 @@ export function DeckHeader({ deck, name, onNameChange, onRegenerate, onTweak }: 
       <ManaCurve cards={deck.cards} />
 
       <div className="flex gap-2">
-        <Pill onClick={onRegenerate} className="flex-1">{en.result.regenerate}</Pill>
-        <Pill onClick={onTweak} className="flex-1">{en.result.tweak}</Pill>
-        <Pill disabled className="flex-1" title="Coming soon">{en.result.share}</Pill>
+        {onRegenerate && <Pill onClick={onRegenerate} className="flex-1">{en.result.regenerate}</Pill>}
+        {onTweak && <Pill onClick={onTweak} className="flex-1">{en.result.tweak}</Pill>}
+        <Pill onClick={onShare} disabled={!onShare} className="flex-1">{shareLabel ?? en.result.share}</Pill>
       </div>
       <div className="text-[11px] text-subtle">{deck.verifiedByBlizzard ? `✓ ${en.result.verified}` : en.result.unverified}</div>
     </aside>

@@ -4,10 +4,18 @@
 // event: error  data: {"kind":"vague","message":"..."}
 
 import { forgeDeck, ForgeError } from "@/lib/deck/pipeline";
+import { clientIp, FORGE_LIMIT, rateLimit } from "@/lib/ratelimit";
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
+  const rl = rateLimit(`forge:${clientIp(req)}`, FORGE_LIMIT.limit, FORGE_LIMIT.windowMs);
+  if (!rl.ok) {
+    return new Response(JSON.stringify({ kind: "busy", message: `Too many requests from this address. Try again in ${rl.retryAfterSec}s.` }), {
+      status: 429,
+      headers: { "Content-Type": "application/json", "Retry-After": String(rl.retryAfterSec) },
+    });
+  }
   let prompt = "";
   try {
     const body = (await req.json()) as { prompt?: string };

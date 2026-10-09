@@ -16,9 +16,10 @@ Dokümanlar: `docs/FIZIBILITE.md` (neden/nasıl), `docs/ROADMAP.md` (faz planı,
 
 - `src/lib/blizzard/` — token, tipli istemci, API tipleri. Blizzard'a **yalnızca** buradan çıkılır.
 - `src/lib/cards/` — yerel önbellek (`data/*.json`) üzerinden kart okuma/arama; LLM için `compact` satır formatı.
-- `src/lib/deck/` — kurallar, deterministik doğrulayıcı, deckstring encode/decode, pipeline.
+- `src/lib/deck/` — kurallar, deterministik doğrulayıcı, deckstring encode/decode, `assemble` (spec → kod + pano metni; forge/refine/swap/paylaşım ortak), `share` (fs'siz istemci yardımcıları), pipeline.
 - `src/lib/ai/` — provider (sağlayıcı seçimi), intent (niyet), retrieve (aday havuzu), build (deste seçimi), repair (onarım). Prompt'lar `src/lib/ai/prompts/*.ts` (sabit string), şemalar `schemas.ts` (Zod).
-- `app/api/forge` — SSE ile adım olayları + sonuç. `app/api/cards` — arama.
+- `app/api/forge` — SSE ile adım olayları + sonuç. `app/api/refine` — düzenleme (LLM). `app/api/deck` — doğrula+kodla (LLM yok). `app/api/cards` — arama. `app/d/[code]` — paylaşım sayfası.
+- İstemci bileşenleri (`"use client"`) `src/lib/cards/repo` veya `assemble` gibi fs kullanan modülleri import edemez; saf yardımcılar `src/lib/deck/share.ts`'te.
 - `data/` — senkron çıktısı, git'e girmez. `scripts/` — sync ve eval.
 - `design/` — Design prototipi (`export/DeckForge.dc.html`), `tokens.md`, `screens.md`. UI yazarken hedef budur.
 - `src/i18n/en.ts` — tüm kullanıcı metinleri.
