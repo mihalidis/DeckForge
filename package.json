@@ -13,7 +13,8 @@
     "eval": "tsx --env-file=.env.local scripts/eval.ts",
     "llm:check": "tsx --env-file=.env.local scripts/llm-check.ts",
     "prebuild": "node scripts/prebuild-sync.mjs",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "check:ids": "tsx scripts/check-ids.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.92",

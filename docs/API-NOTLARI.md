@@ -78,7 +78,7 @@ Limit: 36.000 istek/saat, 100 istek/saniye.
 - Tam 30 kart (Renathal 40 kart Wild'a özel; Standard'da yok).
 - Legendary en fazla 1 kopya, diğerleri 2.
 - Her kart: `classId == deste sınıfı` **veya** `classId == neutral(12)` **veya** `multiClassIds` içinde deste sınıfı var.
-- Her kartın `cardSetId`'si `setGroups` içinde `slug == "standard"` olanın `cardSets` listesinde.
+- Her kartın `cardSetId`'si `setGroups` içinde `slug == "standard"` olanın `cardSets` listesinde **ve** seti `hyped: false` (çıkmış). Blizzard, duyurulan ama çıkmamış genişlemeyi `set=standard`'a şimdiden ekliyor; oyun bu kartlı deste kodunu sessizce reddediyor (2026-10-09'da yaşandı: Reign of the Black Empire).
 - `collectible == 1`.
 - Death Knight: toplam rune ≤ 3, kartların rune gereksinimi (`runeCost`) uyumlu.
 - Sideboard: E.T.C. (3 kart), Zilliax Deluxe 3000 (2 modül) — Faz 2'de yalnız doğrula, LLM'e üretme izni Faz 4+.

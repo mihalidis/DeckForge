@@ -2,6 +2,8 @@
 
 ## [Yayımlanmamış]
 
+- Düzeltme: duyurulmuş ama çıkmamış genişlemenin kartları (`sets[].hyped`) havuzdan çıkarıldı; bu kartları içeren deck kodlarını oyun tanımıyordu. `npm run check:ids` teşhis scripti eklendi (2026-10-09).
+
 - Tarayıcı sekmesi ikonu artık DeckForge logosu (altın kare, ortada elmas) (2026-10-09).
 
 - Metin alanlarındaki kalın sarı odak çerçevesi kaldırıldı; odak artık kapsayıcının ince, soluk ve yuvarlak kenarlığıyla gösteriliyor (2026-10-09).

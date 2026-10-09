@@ -41,8 +41,9 @@ describe("normalizeCard", () => {
 });
 
 describe("standardSetSlugs", () => {
-  it("setGroups'tan okur", () => {
+  it("setGroups'tan okur, yaklaşan (hyped) seti hariç tutar", () => {
     expect(standardSetSlugs(META)).toEqual(["core", "whizbangs-workshop"]);
+    expect(standardSetSlugs(META, { includeUpcoming: true })).toEqual(["core", "whizbangs-workshop", "next-set"]);
   });
   it("grup yoksa hata verir", () => {
     expect(() => standardSetSlugs({ ...META, setGroups: [] })).toThrow(/standard/);

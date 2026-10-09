@@ -28,7 +28,7 @@ Dokümanlar: `docs/FIZIBILITE.md` (neden/nasıl), `docs/ROADMAP.md` (faz planı,
 ## Kurallar
 
 - **Kart id = dbfId.** Blizzard `card.id` alanı deckstring'de kullanılan sayıdır; başka id türetme.
-- **Set, sınıf, kahraman listesi elle yazılmaz.** Standard setleri `metadata.setGroups`'tan, kahraman dbfId'leri `metadata.classes[].cardId`'den okunur.
+- **Set, sınıf, kahraman listesi elle yazılmaz.** Standard setleri `metadata.setGroups`'tan (yaklaşan `hyped` setler hariç — oyun henüz çıkmamış kartlı kodu reddeder), kahraman dbfId'leri `metadata.classes[].cardId`'den okunur.
 - **Geçersiz deste kullanıcıya asla gösterilmez.** Her LLM çıktısı `validate()`'ten geçer; hata varsa `repair()`; hâlâ hata varsa kod doldurur. Doğrulayıcı testsiz değişmez.
 - **LLM'e kart listesi her zaman kart metniyle gider**; model kartları ezberden bilmez varsay. Aday havuzu `compact` formatında gönderilir.
 - **LLM çağrısı yalnızca `src/lib/ai/provider.ts` üzerinden.** Sağlayıcı SDK'ları (`@ai-sdk/google` vb.) başka dosyada import edilmez; model adı ve sağlayıcı `.env`'den gelir. Çıktı her zaman `generateObject` + Zod şeması, serbest metin parse edilmez.

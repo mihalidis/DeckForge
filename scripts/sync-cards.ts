@@ -8,6 +8,7 @@ import {
   buildLookups,
   normalizeCard,
   standardSetSlugs,
+  upcomingSetSlugs,
 } from "../src/lib/cards/normalize";
 import type { CardDataset } from "../src/lib/cards/types";
 
@@ -18,7 +19,9 @@ async function main() {
   console.log("→ metadata çekiliyor…");
   const meta = await blizzard.metadata();
   const standardSets = standardSetSlugs(meta);
+  const upcoming = upcomingSetSlugs(meta);
   console.log(`  Standard setleri (${standardSets.length}): ${standardSets.join(", ")}`);
+  if (upcoming.length) console.log(`  Yaklaşan (henüz oynanamayan, hariç tutuldu): ${upcoming.join(", ")}`);
 
   console.log("→ Standard koleksiyon kartları çekiliyor…");
   const raw = await blizzard.searchAllCards(
@@ -37,7 +40,7 @@ async function main() {
   const dropped = cards.filter((c) => !stdSet.has(c.set));
   const kept = cards.filter((c) => stdSet.has(c.set));
   if (dropped.length) {
-    console.warn(`  ! ${dropped.length} kart setGroups.standard dışında, atıldı: ${Array.from(new Set(dropped.map((c) => c.set))).join(", ")}`);
+    console.log(`  ${dropped.length} kart Standard dışı/yaklaşan setten, atıldı: ${Array.from(new Set(dropped.map((c) => c.set))).join(", ")}`);
   }
 
   const dataset: CardDataset = {

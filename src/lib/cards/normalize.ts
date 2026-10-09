@@ -104,9 +104,17 @@ export function normalizeCard(c: ApiCard, L: Lookups): CardRecord {
   return rec;
 }
 
-/** Standard set grubunu metadata'dan okur; elle set listesi yazılmaz. */
-export function standardSetSlugs(meta: Metadata): string[] {
+/** Standard set grubunu metadata'dan okur; elle set listesi yazılmaz.
+ *  Blizzard, duyurulmuş ama henüz çıkmamış genişlemeyi (`sets[].hyped === true`) Standard grubuna ve
+ *  `set=standard` aramasına şimdiden dahil ediyor; oyun bu kartları içeren kodu reddeder. Varsayılan: hariç. */
+export function standardSetSlugs(meta: Metadata, opts: { includeUpcoming?: boolean } = {}): string[] {
   const group = meta.setGroups.find((g) => g.slug === "standard");
   if (!group) throw new Error("metadata.setGroups içinde 'standard' bulunamadı");
-  return group.cardSets;
+  if (opts.includeUpcoming) return group.cardSets;
+  const upcoming = new Set(meta.sets.filter((s) => s.hyped).map((s) => s.slug));
+  return group.cardSets.filter((slug) => !upcoming.has(slug));
+}
+
+export function upcomingSetSlugs(meta: Metadata): string[] {
+  return meta.sets.filter((s) => s.hyped).map((s) => s.slug);
 }

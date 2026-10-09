@@ -32,4 +32,5 @@ curl -s "https://eu.api.blizzard.com/hearthstone/deck?locale=en_US&code=$DECKCOD
 - `403 Forbidden`: token yok/bitti veya client secret yenilenmiş. Token'ı yeniden al.
 - `/cards` hero kartlarını döndürmez (bilinen davranış); kahraman için `metadata/classes[].cardId` kullan.
 - Yeni set çıktı ama kartlar gelmiyor: Blizzard API'nin güncellenmesi yama sonrası saatler/günler sürebilir; `sync:cards` tekrar çalıştır, gerekirse HearthstoneJSON ile çapraz kontrol.
+- Oyun deck kodunu tanımıyor ama Blizzard `/deck` doğruluyor: destede **yaklaşan setten** (`metadata.sets[].hyped === true`) kart var; sync bunları hariç tutar, `npm run check:ids` ile HearthstoneJSON'a karşı doğrula.
 - `set=standard` ile dönen sayı beklenenden az: `collectible=1` ve `gameMode=constructed` birlikte verildi mi kontrol et.

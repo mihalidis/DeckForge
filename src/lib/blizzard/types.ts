@@ -15,6 +15,7 @@ export interface MetadataSet {
   name: string;
   slug: string;
   type?: string;
+  hyped?: boolean; // true = duyurulmuş ama henüz oynanamayan (yaklaşan) set
   releaseDate?: string | null;
   collectibleCount?: number;
   collectibleRevealedCount?: number;

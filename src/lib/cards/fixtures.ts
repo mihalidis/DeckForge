@@ -6,9 +6,10 @@ export const META: Metadata = {
     { id: 1, slug: "core", name: "Core" },
     { id: 2, slug: "whizbangs-workshop", name: "Whizbang's Workshop" },
     { id: 3, slug: "old-set", name: "Old Set" },
+    { id: 4, slug: "next-set", name: "Next Set", hyped: true },
   ],
   setGroups: [
-    { slug: "standard", name: "Standard", cardSets: ["core", "whizbangs-workshop"], standard: true },
+    { slug: "standard", name: "Standard", cardSets: ["core", "whizbangs-workshop", "next-set"], standard: true },
     { slug: "wild", name: "Wild", cardSets: ["core", "whizbangs-workshop", "old-set"] },
   ],
   types: [
