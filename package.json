@@ -11,7 +11,9 @@
     "test": "vitest run",
     "sync:cards": "tsx --env-file=.env.local scripts/sync-cards.ts",
     "eval": "tsx --env-file=.env.local scripts/eval.ts",
-    "llm:check": "tsx --env-file=.env.local scripts/llm-check.ts"
+    "llm:check": "tsx --env-file=.env.local scripts/llm-check.ts",
+    "prebuild": "node scripts/prebuild-sync.mjs",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.92",
@@ -23,6 +25,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^22",
     "@types/react": "^19",

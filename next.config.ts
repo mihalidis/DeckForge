@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
@@ -11,6 +10,11 @@ const nextConfig: NextConfig = {
         as: "*.css",
       },
     },
+  },
+  // Vercel/serverless: data/*.json derleme sırasında (prebuild → sync:cards) üretilir ve
+  // sunucu fonksiyonlarının paketine dahil edilir; çalışma zamanında fs'ten okunur.
+  outputFileTracingIncludes: {
+    "/*": ["./data/*.json"],
   },
 };
 

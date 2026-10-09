@@ -1,0 +1,5 @@
+{
+  "crons": [
+    { "path": "/api/cron/redeploy", "schedule": "20 8 * * *" }
+  ]
+}

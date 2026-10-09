@@ -46,3 +46,6 @@ next-env.d.ts
 /playwright-report/
 /test-results/
 _to_delete/
+
+# playwright
+/e2e/.auth/

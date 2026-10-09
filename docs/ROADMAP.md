@@ -91,11 +91,13 @@ Kapsam kararı (Faz 1–5): **yalnızca Standard, kullanıcı hesabı yok, dark 
 
 ## Faz 5 — Yayın (2–3 gün)
 
-- [ ] Vercel projesi, env secret'ları, `eu` bölgesi
-- [ ] Vercel Cron: günlük `sync:cards`; yama günleri için manuel tetik ucu (`/api/admin/sync`, gizli token)
-- [ ] Playwright: ana akış smoke testi, CI'da (GitHub Actions)
-- [ ] Alan adı, OG görselleri (`/d/[code]` için dinamik `opengraph-image`), favicon, basit SEO
-- [ ] `CHANGELOG.md` v0.1.0
+- [x] Vercel yapılandırması: `outputFileTracingIncludes` ile `data/*.json` paketlenir, `prebuild` build'de sync çeker (anahtarsız build de geçer)
+- [ ] Vercel projesini oluştur, env'leri gir, ilk deploy (README → Yayına alma)
+- [x] Vercel Cron (`vercel.json`, 08:20 UTC) → `/api/cron/redeploy` (CRON_SECRET) → Deploy Hook → yeni build taze veriyle; yama günü elle Redeploy
+- [x] Playwright smoke (`e2e/smoke.spec.ts`: landing, `/d/[code]`, API 400) — yerelde/preview'da koşar; CI'da typecheck + lint + vitest + build (`.github/workflows/ci.yml`)
+- [x] `/d/[code]/opengraph-image` dinamik OG görseli (sınıf rengi, ad, dust, mana eğrisi)
+- [ ] Alan adı, favicon, `metadataBase`, basit SEO (robots, sitemap)
+- [ ] `CHANGELOG.md` v0.1.0 + GitHub Release; açık kaynak için LICENSE (MIT?) ve İngilizce README kararı
 
 **Bitti kriteri:** Herkese açık URL; günlük senkron çalışıyor; CI yeşil.
 

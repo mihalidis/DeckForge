@@ -10,7 +10,7 @@ Dokümanlar: `docs/FIZIBILITE.md` (neden/nasıl), `docs/ROADMAP.md` (faz planı,
 - `npm run sync:cards` — Blizzard'dan metadata + Standard kartları çekip `data/` altına yazar (Faz 1'den itibaren)
 - `npm run eval` — 30 prompt'luk deste değerlendirme seti (`-- --limit 3`, `-- --no-verify`)
 - `npm run llm:check` — LLM anahtarı/model adı doğrulama
-- `npx tsc --noEmit` · `npx vitest` · `npx playwright test`
+- `npm run typecheck` · `npm test` · `npm run e2e` (Playwright; `data/` gerekir, LLM'e gitmez) · `npm run build` (prebuild: anahtar varsa sync)
 
 ## Yapı
 
@@ -20,7 +20,7 @@ Dokümanlar: `docs/FIZIBILITE.md` (neden/nasıl), `docs/ROADMAP.md` (faz planı,
 - `src/lib/ai/` — provider (sağlayıcı seçimi), intent (niyet), retrieve (aday havuzu), build (deste seçimi), repair (onarım). Prompt'lar `src/lib/ai/prompts/*.ts` (sabit string), şemalar `schemas.ts` (Zod).
 - `app/api/forge` — SSE ile adım olayları + sonuç. `app/api/refine` — düzenleme (LLM). `app/api/deck` — doğrula+kodla (LLM yok). `app/api/cards` — arama. `app/d/[code]` — paylaşım sayfası.
 - İstemci bileşenleri (`"use client"`) `src/lib/cards/repo` veya `assemble` gibi fs kullanan modülleri import edemez; saf yardımcılar `src/lib/deck/share.ts`'te.
-- `data/` — senkron çıktısı, git'e girmez. `scripts/` — sync ve eval.
+- `data/` — senkron çıktısı, git'e girmez; Vercel'de her build'de `prebuild` üretir ve `next.config.ts` `outputFileTracingIncludes` ile fonksiyonlara paketlenir. `scripts/` — sync, eval, llm-check, prebuild.
 - `design/` — Design prototipi (`export/DeckForge.dc.html`), `tokens.md`, `screens.md`. UI yazarken hedef budur.
 - `src/i18n/en.ts` — tüm kullanıcı metinleri.
 - Next 16 API'leri eğitim verinden farklı olabilir: kod yazmadan önce `node_modules/next/dist/docs/` içindeki ilgili rehbere bak (`AGENTS.md`).
